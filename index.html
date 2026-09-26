@@ -185,6 +185,16 @@
             <button type="button" class="color-slot color-slot--secondary" id="color-secondary" data-i18n-title="color.secondary"></button>
             <button type="button" class="btn btn--icon btn--ghost" id="btn-swap-colors" data-icon="swap" data-icon-size="16" data-i18n-title="color.swap"></button>
             <button type="button" class="btn btn--icon btn--ghost" id="btn-eyedropper" data-icon="picker" data-icon-size="16" data-i18n-title="color.eyedropper" hidden></button>
+            <div class="menu color-slots__export">
+              <button type="button" class="btn btn--small btn--primary" id="btn-skin-palette" data-icon="download" data-icon-size="16" aria-haspopup="true" aria-expanded="false" aria-controls="menu-skin-palette" data-i18n-title="color.downloadPalette"><span data-i18n="color.downloadPaletteShort"></span></button>
+              <div class="menu__list menu__list--end" id="menu-skin-palette" role="menu" hidden>
+                <button type="button" role="menuitem" data-value="png" data-i18n="color.paletteMenu.png"></button>
+                <button type="button" role="menuitem" data-value="gpl" data-i18n="color.paletteMenu.gpl"></button>
+                <button type="button" role="menuitem" data-value="json" data-i18n="color.paletteMenu.json"></button>
+                <button type="button" role="menuitem" data-value="txt" data-i18n="color.paletteMenu.txt"></button>
+                <button type="button" role="menuitem" data-value="copy" data-i18n="color.paletteMenu.copy"></button>
+              </div>
+            </div>
           </div>
 
           <div class="color-input">
@@ -227,16 +237,6 @@
                     <button type="button" data-value="exact" data-i18n="color.groupingModes.exact"></button>
                     <button type="button" data-value="similar" data-i18n="color.groupingModes.similar"></button>
                     <button type="button" data-value="wide" data-i18n="color.groupingModes.wide"></button>
-                  </div>
-                  <div class="menu">
-                    <button type="button" class="btn btn--icon btn--tiny" id="btn-skin-palette" data-icon="download" data-icon-size="15" aria-haspopup="true" aria-expanded="false" aria-controls="menu-skin-palette" data-i18n-title="color.downloadPalette"></button>
-                    <div class="menu__list menu__list--end" id="menu-skin-palette" role="menu" hidden>
-                      <button type="button" role="menuitem" data-value="png" data-i18n="color.paletteMenu.png"></button>
-                      <button type="button" role="menuitem" data-value="gpl" data-i18n="color.paletteMenu.gpl"></button>
-                      <button type="button" role="menuitem" data-value="json" data-i18n="color.paletteMenu.json"></button>
-                      <button type="button" role="menuitem" data-value="txt" data-i18n="color.paletteMenu.txt"></button>
-                      <button type="button" role="menuitem" data-value="copy" data-i18n="color.paletteMenu.copy"></button>
-                    </div>
                   </div>
                 </div>
               </div>

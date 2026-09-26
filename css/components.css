@@ -487,6 +487,15 @@ input[type="range"] {
   height: 30px;
 }
 
+/* Descarga de la paleta de la skin: a la derecha de los colores y el cuentagotas. */
+.color-slots__export {
+  margin-left: auto;
+}
+
+.color-slots__export .btn {
+  white-space: nowrap;
+}
+
 /* Entrada de color: texto + formato + copiar */
 .color-input {
   display: flex;
@@ -695,11 +704,6 @@ input[type="range"] {
   display: flex;
   align-items: center;
   gap: 4px;
-}
-
-.btn--tiny {
-  width: 28px;
-  height: 26px;
 }
 
 /* Colores de la skin agrupados por familia */

@@ -156,7 +156,8 @@ export default {
     },
     swatchInfo: '{hex} · {pixels} píxeles',
     swatchMerged: '{hex} · {pixels} píxeles · une {n} tonos parecidos',
-    downloadPalette: 'Descargar la paleta de colores de tu skin',
+    downloadPalette: 'Descargar o copiar todos los colores que usa tu skin, agrupados por familia (PNG, .gpl, JSON o TXT)',
+    downloadPaletteShort: 'Paleta de la skin',
     paletteMenu: {
       png: 'Imagen PNG',
       gpl: 'Paleta GIMP / Aseprite (.gpl)',
