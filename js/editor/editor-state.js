@@ -14,7 +14,7 @@ import { rgbaToHex, sameColor } from '../utils/color.js';
 
 /** Preferencias que se recuerdan entre sesiones. */
 const PERSISTED = ['tool', 'brushSize', 'intensity', 'mirror', 'grid', 'dimInactive', 'viewMode',
-  'autoRotate', 'animation', 'adaptArms', 'primary', 'secondary',
+  'autoRotate', 'animation', 'previewBackground', 'adaptArms', 'primary', 'secondary',
   'colorFormat', 'colorGrouping', 'harmonyType', 'scaleMode'];
 
 export class EditorState extends Emitter {
@@ -35,6 +35,7 @@ export class EditorState extends Emitter {
       viewMode: '3d',
       autoRotate: true,
       animation: 'walk',
+      previewBackground: 'default', // fondo de la vista previa (ver core/backgrounds.js)
       previewOverlay: true,
       adaptArms: true,
       colorFormat: 'hex',        // formato del campo de color: hex | rgb | hsl | oklch

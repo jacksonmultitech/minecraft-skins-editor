@@ -289,8 +289,10 @@ npx serve .
         <ul>
           <li><strong>Arrastra</strong> para girarlo, usa la <strong>rueda</strong> para acercarte y haz <strong>doble clic</strong> para reiniciar la cámara.</li>
           <li><strong>Animación</strong>: sin animación, en reposo, caminar, correr o saludar.</li>
+          <li><strong>Fondo</strong>: el color del tema (<em>Predeterminado</em>), una escena al estilo de Minecraft (<em>Pradera de día</em>, <em>Atardecer</em>, <em>Noche estrellada</em>, <em>Cueva con minerales</em>, <em>Nether</em>, <em>El End</em>), una <em>Pantalla verde</em> para recortar el personaje en un editor de video, o una <em>Imagen personalizada</em>. Las escenas se dibujan por código como pixel art, sin usar texturas del juego.</li>
+          <li>Para usar tu propia imagen, elige <em>Imagen personalizada…</em> o pulsa el botón con el ícono de imagen junto al selector. La imagen se ajusta para cubrir todo el recuadro sin deformarse, se reduce a 1024 px como máximo y se guarda en tu navegador para la próxima vez (si no cabe, se usa solo en esa sesión).</li>
           <li><strong>Rotación automática</strong> y <strong>Capa externa</strong> se activan o desactivan con sus interruptores.</li>
-          <li>Debajo del personaje, a la izquierda, se recuerdan los controles; a la derecha, el botón de cámara descarga una <strong>captura PNG</strong> de la vista previa.</li>
+          <li>Debajo del personaje, a la izquierda, se recuerdan los controles; a la derecha, el botón de cámara descarga una <strong>captura PNG</strong> de la vista previa, con el fondo elegido.</li>
         </ul>
       </section>
 
@@ -455,6 +457,7 @@ npx serve .
         </div>
 
         <h3>Cómo funciona y privacidad</h3>
+        <p>Las imágenes que recibe el agente con <code>get_skin_image</code> usan siempre el fondo liso del tema, aunque tengas elegido otro fondo, para que pueda juzgar bien los colores.</p>
         <p>El servidor MCP (desplegado en Vercel) no pinta nada: guarda por unos segundos las órdenes del agente en una cola; el editor las consulta, las ejecuta con su propio motor y devuelve el resultado. El <strong>código</strong> identifica tu sesión y el <strong>token</strong> secreto nunca sale de tu navegador. El servidor no guarda tus skins. En <strong>Opciones avanzadas</strong> puedes apuntar a otro servidor (por ejemplo, uno propio o local con <code>?bridge=http://localhost:3000</code>).</p>
       </section>
 
@@ -510,6 +513,7 @@ npx serve .
 │   │   ├── png-decoder.js  Decodificador PNG exacto
 │   │   ├── transforms.js   Limpiar capas, reflejar lados, adaptar brazos
 │   │   ├── color-theory.js Armonías, escala tonal, paleta aleatoria, agrupar colores
+│   │   ├── backgrounds.js  Fondos de la vista previa en pixel art (generados por código)
 │   │   └── templates.js    Skins iniciales generadas por código
 │   ├── render/             WebGL2 sin librerías
 │   │   ├── math.js         Matrices y vectores
@@ -527,6 +531,7 @@ npx serve .
 │   │   ├── toolbar.js · color-panel.js · harmony-panel.js · layers-panel.js
 │   │   ├── palette-export.js  PNG, .gpl y JSON de paletas
 │   │   ├── sidebar-resizer.js Borde arrastrable del panel lateral
+│   │   ├── background-picker.js Selector "Fondo" e imagen personalizada
 │   │   ├── agent-panel.js     Diálogo "Conectar con un agente de IA" y registro de actividad
 │   │   ├── menu.js · dialogs.js · toast.js · theme.js · icons.js
 │   ├── remote/             Conexión con un agente de IA (MCP)
@@ -580,6 +585,13 @@ npx serve .
 
         <h3>Agregar una animación a la vista previa</h3>
         <p>En <code>js/editor/preview.js</code>, añade un caso a <code>computePose()</code> que devuelva una matriz de rotación por parte (alrededor de su pivote) y agrega la opción en el <code>&lt;select id="opt-animation"&gt;</code> y en <code>preview.anim</code> de i18n.</p>
+
+        <h3>Agregar un fondo a la vista previa</h3>
+        <ol>
+          <li>En <code>js/core/backgrounds.js</code>, agrega una función a <code>SCENES</code> que dibuje sobre el lienzo de 128×128 (usa <code>block()</code> para bloques de 8×8 con textura, <code>sky()</code>, <code>grassGround()</code>, etc.).</li>
+          <li>Agrega su id a <code>BACKGROUND_IDS</code> y <code>GENERATED_BACKGROUNDS</code>, y el nombre en <code>preview.bg</code> de i18n.</li>
+        </ol>
+        <p>El selector se arma solo con esa lista, y las pruebas comprueban que cada fondo sea opaco y determinista.</p>
 
         <h3>Convenciones</h3>
         <ul>

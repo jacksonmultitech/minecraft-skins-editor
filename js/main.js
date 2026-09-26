@@ -22,6 +22,7 @@ import { ToolController } from './editor/tools.js';
 import { Viewport3D } from './editor/viewport-3d.js';
 import { Viewport2D } from './editor/viewport-2d.js';
 import { Preview } from './editor/preview.js';
+import { BackgroundPicker } from './ui/background-picker.js';
 import { registerShortcuts } from './editor/shortcuts.js';
 import { Toolbar } from './ui/toolbar.js';
 import { ColorPanel } from './ui/color-panel.js';
@@ -94,6 +95,13 @@ export class App {
     this.viewport2d = new Viewport2D($('canvas-2d'), { ...deps, onZoom: (s) => this._showZoom(s) });
     try {
       this.preview = new Preview($('canvas-preview'), { doc: this.doc, state: this.state });
+      this.backgroundPicker = new BackgroundPicker({
+        select: $('opt-background'),
+        uploadButton: $('btn-background-upload'),
+        fileInput: $('background-input'),
+        state: this.state,
+        preview: this.preview,
+      });
     } catch (err) {
       console.error(err);
       this.preview = null;
@@ -224,6 +232,9 @@ export class App {
         case 'animation':
         case 'previewOverlay':
           this.preview?.syncState();
+          break;
+        case 'previewBackground':
+          this.backgroundPicker?.apply();
           break;
         default:
           this.viewport3d?.syncState();

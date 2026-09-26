@@ -19,6 +19,7 @@ Genera archivos **PNG RGBA de 64×64 px**, el formato que aceptan Minecraft: Jav
 - Capa base y capa externa con visibilidad por parte del cuerpo y botones para ocultar o mostrar cada capa completa.
 - Modelo clásico (4 px) y delgado (3 px), con detección automática y adaptación de brazos.
 - Vista previa animada (reposo, caminar, correr, saludar) que se puede rotar, y captura en PNG.
+- Fondos para la vista previa: escenas al estilo de Minecraft dibujadas por código (pradera, atardecer, noche, cueva, Nether, El End), pantalla verde o una imagen propia.
 - Abre PNG de 64×64, convierte skins antiguas de 64×32 y reduce las HD. También acepta arrastrar y soltar y pegar.
 - Codificador y decodificador PNG propios (sin pérdida en la semitransparencia).
 - Verificación de compatibilidad con Java y Bedrock antes de descargar.

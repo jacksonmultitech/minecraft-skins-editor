@@ -344,8 +344,29 @@ input[type="range"] {
   font-size: var(--text-sm);
 }
 
-.select-field > span {
+.select-field > span,
+.select-field > label {
   white-space: nowrap;
+}
+
+/* Selector con un botón al lado (por ejemplo, Fondo + cargar imagen). */
+.select-field__group {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.select-field__group select {
+  flex: 0 1 auto;
+  width: 100%;
+  max-width: max-content;
+}
+
+.select-field__group .btn {
+  flex: none;
 }
 
 .select-field select {

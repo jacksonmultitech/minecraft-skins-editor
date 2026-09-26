@@ -98,6 +98,15 @@ export class Preview {
     this.requestRender();
   }
 
+  /**
+   * Cambia la imagen de fondo (null = color del tema).
+   * @param {Parameters<SkinRenderer['setBackground']>[0]} source
+   */
+  setBackground(source) {
+    this.renderer.setBackground(source);
+    this.requestRender();
+  }
+
   onTextureChange() {
     this.renderer.updateTexture(this.doc.pixels);
     this.requestRender();
@@ -144,7 +153,8 @@ export class Preview {
   }
 
   /**
-   * Captura con un encuadre fijo y sin animación (para que el agente revise la skin).
+   * Captura con un encuadre fijo, sin animación y con el fondo liso del tema
+   * (para que el agente revise la skin sin distracciones).
    * @param {'front'|'back'|'left'|'right'} [angle='front'] Vista 3/4 desde ese lado.
    * @returns {Promise<Blob>}
    */
@@ -153,9 +163,10 @@ export class Preview {
     const saved = { yaw: this.camera.yaw, pitch: this.camera.pitch, distance: this.camera.distance, target: [...this.camera.target] };
     this.camera.reset();
     Object.assign(this.camera, { yaw, pitch: 0.15, distance: 60 });
-    this.renderer.render(this.camera, { pose: {} });
+    this.renderer.render(this.camera, { pose: {}, background: false });
     const promise = new Promise((resolve) => this.canvas.toBlob(resolve, 'image/png'));
     Object.assign(this.camera, saved);
+    this.requestRender(); // vuelve a mostrar el fondo elegido
     return promise;
   }
 
