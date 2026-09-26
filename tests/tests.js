@@ -14,6 +14,8 @@ import { transformVec } from '../js/render/math.js';
 import { hexToRgba, rgbaToHex, rgbToHsv, hsvToRgb, rgbToHsl, hslToRgb, rgbToOklch, oklchToRgb, parseColor, formatColor } from '../js/utils/color.js';
 import { harmony, tonalScale, groupSkinColors, colorFamily, randomPalette } from '../js/core/color-theory.js';
 import { toGpl } from '../js/ui/palette-export.js';
+import { generateBackground, GENERATED_BACKGROUNDS, BACKGROUND_IDS, CHROMA_GREEN } from '../js/core/backgrounds.js';
+import { coverTransform } from '../js/render/renderer.js';
 
 const results = [];
 
@@ -259,6 +261,35 @@ await test('Paleta GIMP (.gpl): cabecera y una línea "R G B nombre" por color',
   assert(lines[0] === 'GIMP Palette' && lines[1] === 'Name: Prueba', 'Cabecera incorrecta');
   assert(lines[4] === '245  73  39\tRojo', `Línea incorrecta: ${lines[4]}`);
   assert(lines[5] === '  0   0   0\t#000000', `Línea incorrecta: ${lines[5]}`);
+});
+
+await test('Fondos de la vista previa: 128×128, opacos y siempre iguales', () => {
+  for (const id of GENERATED_BACKGROUNDS) {
+    const a = generateBackground(id);
+    const b = generateBackground(id);
+    assert(a.width === 128 && a.height === 128 && a.pixels.length === 128 * 128 * 4, `${id}: tamaño incorrecto`);
+    for (let i = 3; i < a.pixels.length; i += 4) assert(a.pixels[i] === 255, `${id}: hay píxeles transparentes`);
+    assert(a.pixels.every((v, i) => v === b.pixels[i]), `${id}: el resultado cambia entre llamadas`);
+  }
+  assert(generateBackground('default') === null && generateBackground('custom') === null, '"default" y "custom" no se generan');
+  assert(BACKGROUND_IDS.includes('default') && BACKGROUND_IDS.includes('custom'), 'Faltan opciones del selector');
+  const chroma = generateBackground('chroma').pixels;
+  const [r, g, b] = hexToRgba(CHROMA_GREEN);
+  for (let i = 0; i < chroma.length; i += 4) assert(chroma[i] === r && chroma[i + 1] === g && chroma[i + 2] === b, 'La pantalla verde debe ser un color liso');
+});
+
+await test('Fondo "cover": llena el lienzo sin deformar la imagen', () => {
+  const near = (x, y) => Math.abs(x - y) < 1e-9;
+  // Lienzo más ancho que la imagen: se recorta arriba y abajo, centrado.
+  let [sx, sy, ox, oy] = coverTransform(2, 1);
+  assert(near(sx, 1) && near(sy, 0.5) && near(ox, 0) && near(oy, 0.25), `2:1 sobre 1:1 → ${[sx, sy, ox, oy]}`);
+  // Lienzo más angosto: se recortan los costados.
+  [sx, sy, ox, oy] = coverTransform(1, 16 / 9);
+  assert(near(sy, 1) && near(sx, 9 / 16) && near(ox, (1 - 9 / 16) / 2) && near(oy, 0), 'Recorte lateral incorrecto');
+  // La porción visible conserva la proporción del lienzo.
+  const canvas = 0.95, image = 16 / 9;
+  [sx, sy] = coverTransform(canvas, image);
+  assert(near((sx * image) / sy, canvas), 'La proporción visible no coincide con el lienzo');
 });
 
 /* ------------------------------------------------------------------------ */

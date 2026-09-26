@@ -7,6 +7,7 @@
  *  - una cuadrícula sobre cada píxel,
  *  - el resaltado del píxel bajo el cursor (y su simétrico en modo espejo),
  *  - un patrón de ajedrez donde la capa base es transparente.
+ * Opcionalmente dibuja una imagen de fondo detrás del personaje (vista previa).
  */
 import { SKIN_WIDTH, SKIN_HEIGHT, LAYER, OVERLAY_ALPHA_CUTOFF } from '../config.js';
 import { getBoxes, PART_ORDER } from '../core/skin-model.js';
@@ -91,6 +92,42 @@ void main() {
   outColor = vec4(rgb, color.a * uOpacity);
 }`;
 
+/* Fondo: un rectángulo que cubre el lienzo y recorta la imagen como "cover". */
+const BACKGROUND_VERTEX_SHADER = `#version 300 es
+in vec2 aCorner;
+uniform vec4 uCover; // escala (xy) y desplazamiento (zw) de las coordenadas de textura
+out vec2 vUV;
+void main() {
+  vec2 uv = aCorner * 0.5 + 0.5;
+  vUV = vec2(uv.x, 1.0 - uv.y) * uCover.xy + uCover.zw;
+  gl_Position = vec4(aCorner, 0.0, 1.0);
+}`;
+
+const BACKGROUND_FRAGMENT_SHADER = `#version 300 es
+precision mediump float;
+in vec2 vUV;
+uniform sampler2D uBackground;
+out vec4 outColor;
+void main() {
+  outColor = vec4(texture(uBackground, vUV).rgb, 1.0);
+}`;
+
+/**
+ * Escala y desplazamiento de las coordenadas de textura para que la imagen
+ * cubra todo el lienzo sin deformarse (se recorta el sobrante, centrado).
+ * @param {number} canvasAspect Ancho / alto del lienzo.
+ * @param {number} imageAspect Ancho / alto de la imagen.
+ * @returns {[number, number, number, number]} [escalaX, escalaY, desplX, desplY]
+ */
+export function coverTransform(canvasAspect, imageAspect) {
+  if (canvasAspect > imageAspect) {
+    const sy = imageAspect / canvasAspect;
+    return [1, sy, 0, (1 - sy) / 2];
+  }
+  const sx = canvasAspect / imageAspect;
+  return [sx, 1, (1 - sx) / 2, 0];
+}
+
 /** Compila un shader y lanza un error legible si falla. */
 function compile(gl, type, source) {
   const shader = gl.createShader(type);
@@ -104,11 +141,11 @@ function compile(gl, type, source) {
   return shader;
 }
 
-/** Enlaza el programa de shaders. */
-function createProgram(gl) {
+/** Enlaza un programa de shaders. */
+function createProgram(gl, vertexSource = VERTEX_SHADER, fragmentSource = FRAGMENT_SHADER) {
   const program = gl.createProgram();
-  gl.attachShader(program, compile(gl, gl.VERTEX_SHADER, VERTEX_SHADER));
-  gl.attachShader(program, compile(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER));
+  gl.attachShader(program, compile(gl, gl.VERTEX_SHADER, vertexSource));
+  gl.attachShader(program, compile(gl, gl.FRAGMENT_SHADER, fragmentSource));
   gl.linkProgram(program);
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
     throw new Error(`Error al enlazar shaders: ${gl.getProgramInfoLog(program)}`);
@@ -192,6 +229,87 @@ export class SkinRenderer {
     /** @type {Array<{box: object, vao: WebGLVertexArrayObject, count: number, buffers: WebGLBuffer[]}>} */
     this.meshes = [];
     this.model = null;
+
+    /** Fondo opcional: { texture, width, height } o null (color liso). */
+    this.background = null;
+    this._backgroundGL = null; // programa y geometría del fondo (se crean al primer uso)
+  }
+
+  /**
+   * Cambia la imagen de fondo.
+   * @param {null | { pixels: Uint8ClampedArray, width: number, height: number, smooth?: boolean }
+   *   | { image: TexImageSource & { width: number, height: number }, smooth?: boolean }} source
+   *   `null` vuelve al color liso; `smooth` suaviza al escalar (fotos) en lugar de mantener los píxeles nítidos.
+   */
+  setBackground(source) {
+    const { gl } = this;
+    if (!source) {
+      if (this.background) gl.deleteTexture(this.background.texture);
+      this.background = null;
+      return;
+    }
+    this._ensureBackgroundGL();
+    const texture = this.background?.texture ?? gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    let width, height;
+    if (source.pixels) {
+      ({ width, height } = source);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+        new Uint8Array(source.pixels.buffer, source.pixels.byteOffset, source.pixels.byteLength));
+    } else {
+      width = source.image.naturalWidth || source.image.width;
+      height = source.image.naturalHeight || source.image.height;
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source.image);
+    }
+    if (source.smooth) {
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    } else {
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    }
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    this.background = { texture, width, height };
+  }
+
+  /** Crea el programa y el rectángulo del fondo la primera vez que se necesitan. */
+  _ensureBackgroundGL() {
+    if (this._backgroundGL) return;
+    const { gl } = this;
+    const program = createProgram(gl, BACKGROUND_VERTEX_SHADER, BACKGROUND_FRAGMENT_SHADER);
+    const vao = gl.createVertexArray();
+    gl.bindVertexArray(vao);
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(program, 'aCorner');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    gl.bindVertexArray(null);
+    this._backgroundGL = {
+      program,
+      vao,
+      uCover: gl.getUniformLocation(program, 'uCover'),
+      uBackground: gl.getUniformLocation(program, 'uBackground'),
+    };
+  }
+
+  /** Dibuja el fondo cubriendo el lienzo (sin escribir profundidad). */
+  _drawBackground(width, height) {
+    const { gl, background } = this;
+    const bg = this._backgroundGL;
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.BLEND);
+    gl.useProgram(bg.program);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, background.texture);
+    gl.uniform1i(bg.uBackground, 0);
+    gl.uniform4fv(bg.uCover, coverTransform(width / height, background.width / background.height));
+    gl.bindVertexArray(bg.vao);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    gl.bindVertexArray(null);
   }
 
   _locateUniforms() {
@@ -283,15 +401,17 @@ export class SkinRenderer {
   /**
    * Dibuja la escena.
    * @param {import('./camera.js').OrbitCamera} camera
-   * @param {{ pose?: Record<string, Float32Array>, root?: Float32Array }} [scene]
+   * @param {{ pose?: Record<string, Float32Array>, root?: Float32Array, background?: boolean }} [scene]
+   *   background: false dibuja solo el color liso aunque haya una imagen de fondo.
    */
-  render(camera, { pose, root } = {}) {
+  render(camera, { pose, root, background = true } = {}) {
     const { gl, u, options } = this;
     const { width, height } = this.resize();
     gl.viewport(0, 0, width, height);
     const [r, g, b] = options.clearColor;
     gl.clearColor(r, g, b, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    if (background && this.background) this._drawBackground(width, height);
     gl.enable(gl.DEPTH_TEST);
     gl.useProgram(this.program);
 
