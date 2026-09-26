@@ -1,5 +1,5 @@
 /**
- * @file claude-bridge.js
+ * @file agent-bridge.js
  * Puente entre el editor y Claude (a través del servidor MCP en Vercel).
  *
  *  1. connect(): pide al servidor una sesión → recibe { code, token }.
@@ -28,7 +28,7 @@ class BridgeHttpError extends Error {
   }
 }
 
-export class ClaudeBridge extends Emitter {
+export class AgentBridge extends Emitter {
   /**
    * @param {object} options
    * @param {Record<string, (args: object) => Promise<object>>} options.handlers Órdenes disponibles.
@@ -104,7 +104,7 @@ export class ClaudeBridge extends Emitter {
     try {
       const { code, token, expiresIn } = await this._call('/api/bridge/session', 'POST');
       this.session = { code, token, baseUrl: this.baseUrl, expiresAt: Date.now() + expiresIn * 1000 };
-      saveJSON(STORAGE_KEYS.CLAUDE_SESSION, this.session);
+      saveJSON(STORAGE_KEYS.AGENT_SESSION, this.session);
       this._start();
     } catch (error) {
       this.session = null;
@@ -114,9 +114,9 @@ export class ClaudeBridge extends Emitter {
 
   /** Recupera la sesión guardada (por ejemplo, tras recargar la página). */
   resume() {
-    const saved = loadJSON(STORAGE_KEYS.CLAUDE_SESSION, null);
+    const saved = loadJSON(STORAGE_KEYS.AGENT_SESSION, null);
     if (!saved?.code || !saved?.token || saved.expiresAt < Date.now()) {
-      removeKey(STORAGE_KEYS.CLAUDE_SESSION);
+      removeKey(STORAGE_KEYS.AGENT_SESSION);
       return false;
     }
     this.session = saved;
@@ -133,7 +133,7 @@ export class ClaudeBridge extends Emitter {
     const session = this.session;
     this._runId++;
     this.session = null;
-    removeKey(STORAGE_KEYS.CLAUDE_SESSION);
+    removeKey(STORAGE_KEYS.AGENT_SESSION);
     this._setStatus('off', reason);
     if (notifyServer && session) {
       fetch(`${session.baseUrl}/api/bridge/session`, {

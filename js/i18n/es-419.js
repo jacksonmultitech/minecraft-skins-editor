@@ -11,7 +11,7 @@ export default {
     shortTitle: 'Editor de Skins',
     tagline: 'Crea y edita skins 64×64 compatibles con Java y Bedrock',
   },
-  claude: {
+  agent: {
     button: 'Claude',
     title: 'Conectar con Claude',
     intro: 'Deja que Claude cree o edite tu skin en vivo: verás cada cambio en el editor y podrás deshacerlo con Ctrl+Z.',

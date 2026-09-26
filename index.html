@@ -52,7 +52,7 @@
       </div>
 
       <div class="topbar__actions">
-        <button type="button" class="btn btn--claude" id="btn-claude" data-icon="sparkle" data-state="off"><span data-i18n="claude.button"></span></button>
+        <button type="button" class="btn btn--agent" id="btn-agent" data-icon="sparkle" data-state="off"><span data-i18n="agent.button"></span></button>
         <button type="button" class="btn btn--icon" id="btn-check" data-icon="check" data-i18n-title="menu.check"></button>
         <button type="button" class="btn btn--icon" id="btn-help" data-icon="help" data-i18n-title="menu.help"></button>
         <a class="btn btn--icon" href="docs/index.html" target="_blank" rel="noopener" data-icon="book" data-i18n-title="menu.docs"></a>
@@ -139,7 +139,7 @@
         <span id="status-hover">—</span>
         <span class="statusbar__spacer"></span>
         <span id="status-zoom" hidden></span>
-        <button type="button" class="statusbar__claude" id="status-claude" data-state="off" hidden><span></span></button>
+        <button type="button" class="statusbar__agent" id="status-agent" data-state="off" hidden><span></span></button>
         <span id="status-tool"></span>
         <span id="status-model"></span>
         <span id="status-save" class="statusbar__save"></span>
@@ -376,58 +376,58 @@
     </form>
   </dialog>
 
-  <dialog id="dialog-claude" class="dialog dialog--claude" aria-labelledby="claude-title">
+  <dialog id="dialog-agent" class="dialog dialog--agent" aria-labelledby="agent-title">
     <div class="dialog__inner">
       <header class="dialog__header">
-        <h2 class="dialog__title" id="claude-title" data-i18n="claude.title"></h2>
+        <h2 class="dialog__title" id="agent-title" data-i18n="agent.title"></h2>
         <form method="dialog"><button class="btn btn--icon btn--ghost" value="close" data-icon="close" data-i18n-title="dialogs.close"></button></form>
       </header>
-      <p class="dialog__body" data-i18n="claude.intro"></p>
+      <p class="dialog__body" data-i18n="agent.intro"></p>
 
-      <ol class="claude-steps">
+      <ol class="agent-steps">
         <li>
-          <span data-i18n="claude.step1"></span>
-          <div class="claude-url">
-            <code id="claude-mcp-url"></code>
-            <button type="button" class="btn btn--small" id="btn-claude-copy-url" data-icon="copy" data-icon-size="15"><span data-i18n="claude.copyUrl"></span></button>
+          <span data-i18n="agent.step1"></span>
+          <div class="agent-url">
+            <code id="agent-mcp-url"></code>
+            <button type="button" class="btn btn--small" id="btn-agent-copy-url" data-icon="copy" data-icon-size="15"><span data-i18n="agent.copyUrl"></span></button>
           </div>
-          <small class="panel__hint" data-i18n="claude.step1Hint"></small>
+          <small class="panel__hint" data-i18n="agent.step1Hint"></small>
         </li>
-        <li><span data-i18n="claude.step2"></span></li>
-        <li><span data-i18n="claude.step3"></span></li>
+        <li><span data-i18n="agent.step2"></span></li>
+        <li><span data-i18n="agent.step3"></span></li>
       </ol>
 
-      <div class="claude-status" id="claude-status" data-state="off" role="status">
-        <span class="claude-status__dot" aria-hidden="true"></span>
-        <span id="claude-status-text"></span>
+      <div class="agent-status" id="agent-status" data-state="off" role="status">
+        <span class="agent-status__dot" aria-hidden="true"></span>
+        <span id="agent-status-text"></span>
       </div>
 
-      <div class="claude-code" id="claude-code" hidden>
-        <span class="claude-code__label" data-i18n="claude.codeLabel"></span>
-        <strong class="claude-code__value" id="claude-code-value"></strong>
-        <div class="claude-code__actions">
-          <button type="button" class="btn btn--small" id="btn-claude-copy-code" data-icon="copy" data-icon-size="15"><span data-i18n="claude.copyCode"></span></button>
-          <button type="button" class="btn btn--small" id="btn-claude-copy-message" data-icon="copy" data-icon-size="15"><span data-i18n="claude.copyMessage"></span></button>
+      <div class="agent-code" id="agent-code" hidden>
+        <span class="agent-code__label" data-i18n="agent.codeLabel"></span>
+        <strong class="agent-code__value" id="agent-code-value"></strong>
+        <div class="agent-code__actions">
+          <button type="button" class="btn btn--small" id="btn-agent-copy-code" data-icon="copy" data-icon-size="15"><span data-i18n="agent.copyCode"></span></button>
+          <button type="button" class="btn btn--small" id="btn-agent-copy-message" data-icon="copy" data-icon-size="15"><span data-i18n="agent.copyMessage"></span></button>
         </div>
       </div>
 
-      <section class="claude-log">
-        <h3 data-i18n="claude.activity"></h3>
-        <ul class="claude-activity" id="claude-activity" aria-live="polite"></ul>
+      <section class="agent-log">
+        <h3 data-i18n="agent.activity"></h3>
+        <ul class="agent-activity" id="agent-activity" aria-live="polite"></ul>
       </section>
 
-      <details class="claude-advanced">
-        <summary data-i18n="claude.advanced"></summary>
-        <label class="claude-advanced__field">
-          <span data-i18n="claude.server"></span>
-          <input type="url" id="claude-server-url" spellcheck="false" autocomplete="off">
+      <details class="agent-advanced">
+        <summary data-i18n="agent.advanced"></summary>
+        <label class="agent-advanced__field">
+          <span data-i18n="agent.server"></span>
+          <input type="url" id="agent-server-url" spellcheck="false" autocomplete="off">
         </label>
-        <button type="button" class="btn btn--small" id="btn-claude-save-server"><span data-i18n="claude.saveServer"></span></button>
+        <button type="button" class="btn btn--small" id="btn-agent-save-server"><span data-i18n="agent.saveServer"></span></button>
       </details>
 
       <div class="dialog__actions">
-        <button type="button" class="btn btn--danger-outline" id="btn-claude-disconnect" hidden><span data-i18n="claude.disconnect"></span></button>
-        <button type="button" class="btn btn--primary" id="btn-claude-connect"><span data-i18n="claude.connect"></span></button>
+        <button type="button" class="btn btn--danger-outline" id="btn-agent-disconnect" hidden><span data-i18n="agent.disconnect"></span></button>
+        <button type="button" class="btn btn--primary" id="btn-agent-connect"><span data-i18n="agent.connect"></span></button>
       </div>
     </div>
   </dialog>

@@ -376,12 +376,12 @@
 }
 
 @media (max-width: 520px) {
-  .btn--claude {
+  .btn--agent {
     width: 36px;
     padding: 0;
   }
 
-  .btn--claude span {
+  .btn--agent span {
     display: none;
   }
 }

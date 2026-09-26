@@ -29,8 +29,8 @@ import { LayersPanel } from './ui/layers-panel.js';
 import { HarmonyPanel } from './ui/harmony-panel.js';
 import { bindMenu } from './ui/menu.js';
 import { SidebarResizer } from './ui/sidebar-resizer.js';
-import { ClaudePanel } from './ui/claude-panel.js';
-import { ClaudeBridge } from './remote/claude-bridge.js';
+import { AgentPanel } from './ui/agent-panel.js';
+import { AgentBridge } from './remote/agent-bridge.js';
 import { createCommandHandlers } from './remote/commands.js';
 import { hydrateIcons, icon } from './ui/icons.js';
 import { initTheme, toggleTheme, currentTheme, themeEvents } from './ui/theme.js';
@@ -106,9 +106,9 @@ export class App {
     this.sidebarResizer = new SidebarResizer($('sidebar-resizer'), document.querySelector('.app'));
 
     // Conexión con Claude (MCP). Si había una sesión activa, se retoma.
-    this.claudeBridge = new ClaudeBridge({ handlers: createCommandHandlers(this) });
-    this.claudePanel = new ClaudePanel(this.claudeBridge);
-    this.claudeBridge.resume();
+    this.agentBridge = new AgentBridge({ handlers: createCommandHandlers(this) });
+    this.agentPanel = new AgentPanel(this.agentBridge);
+    this.agentBridge.resume();
     // Dentro de claude.ai solo se permiten ciertas extensiones: .gpl no está entre ellas.
     hasHostDownloads().then((hosted) => {
       if (hosted) document.querySelectorAll('.menu__list [data-value="gpl"]').forEach((el) => { el.hidden = true; });

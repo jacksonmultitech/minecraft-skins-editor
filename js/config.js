@@ -35,7 +35,7 @@ export const STORAGE_KEYS = Object.freeze({
   SETTINGS: 'mse.settings',
   RECENT_COLORS: 'mse.recentColors',
   SIDEBAR_WIDTH: 'mse.sidebarWidth',
-  CLAUDE_SESSION: 'mse.claudeSession',
+  AGENT_SESSION: 'mse.agentSession',
   BRIDGE_URL: 'mse.bridgeUrl',
 });
 
