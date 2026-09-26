@@ -199,8 +199,8 @@ export default {
     use: 'Usar {hex} como color principal',
     random: 'Paleta aleatoria',
     randomTitle: 'Elegir un color base y una armonía al azar',
-    export: 'Exportar colores',
-    exportTitle: 'Exportar la armonía y la escala tonal',
+    export: 'Exportar armonía y escala',
+    exportTitle: 'Descargar o copiar solo los colores de esta sección: la armonía y la escala tonal actuales (para los colores de tu skin usa "Paleta de la skin")',
     exportMenu: {
       copyHex: 'Copiar lista HEX',
       copyCss: 'Copiar como variables CSS',
