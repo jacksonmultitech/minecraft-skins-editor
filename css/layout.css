@@ -1,0 +1,387 @@
+/* ==========================================================================
+   layout.css — Estructura principal de la aplicación.
+
+   ┌──────────────────── topbar ────────────────────┐
+   │ toolbar │        workspace          │ sidebar  │
+   │         │  (barra · vista · estado) │ (paneles)│
+   └─────────┴───────────────────────────┴──────────┘
+   ========================================================================== */
+
+.app {
+  display: grid;
+  height: 100%; /* html y body miden 100 %: se adapta también a barras del sistema */
+  grid-template-columns: var(--toolbar-w) minmax(0, 1fr) var(--sidebar-w);
+  grid-template-rows: var(--topbar-h) minmax(0, 1fr);
+  grid-template-areas:
+    "top top top"
+    "tools work side";
+}
+
+/* ------------------------------ Encabezado ------------------------------ */
+.topbar {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-3);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  margin-right: auto;
+}
+
+.brand__logo {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  /* Carita pixelada hecha solo con CSS */
+  background:
+    linear-gradient(#fff, #fff) 6px 10px / 5px 4px no-repeat,
+    linear-gradient(#fff, #fff) 17px 10px / 5px 4px no-repeat,
+    linear-gradient(#143b38, #143b38) 9px 18px / 10px 3px no-repeat,
+    linear-gradient(var(--accent), var(--accent));
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.18);
+}
+
+.brand__title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar__file,
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ------------------------- Barra de herramientas ------------------------ */
+.toolbar {
+  grid-area: tools;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+}
+
+.toolbar__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.toolbar__group:last-child {
+  border-bottom: 0;
+}
+
+/* ---------------------------- Área de trabajo --------------------------- */
+.workspace {
+  grid-area: work;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.workspace__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.tool-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin-left: auto;
+}
+
+.viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: var(--viewport-bg);
+  overflow: hidden;
+}
+
+.viewport__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none; /* los gestos táctiles los maneja el editor */
+  cursor: crosshair;
+}
+
+.viewport__canvas.is-grabbing {
+  cursor: grabbing;
+}
+
+.workspace[data-tool="picker"] .viewport__canvas {
+  cursor: copy;
+}
+
+.viewport__overlay {
+  position: absolute;
+  display: flex;
+  gap: var(--space-1);
+  pointer-events: none;
+}
+
+.viewport__overlay > * {
+  pointer-events: auto;
+}
+
+.viewport__views {
+  top: var(--space-3);
+  left: var(--space-3);
+  flex-wrap: wrap;
+  max-width: calc(100% - 80px);
+}
+
+.viewport__zoom {
+  right: var(--space-3);
+  top: var(--space-3);
+  flex-direction: column;
+}
+
+.viewport__hint {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-3);
+  transform: translateX(-50%);
+  max-width: calc(100% - 24px);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  text-align: center;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  height: var(--statusbar-h);
+  padding: 0 var(--space-3);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.statusbar__spacer {
+  flex: 1;
+}
+
+.statusbar__save::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  vertical-align: 1px;
+}
+
+.statusbar__save:empty {
+  display: none;
+}
+
+.statusbar__save.is-off::before {
+  background: var(--warning);
+}
+
+/* ------------------------------ Panel lateral --------------------------- */
+/* El borde arrastrable comparte el área "side" y se alinea a su izquierda. */
+.sidebar-resizer {
+  grid-area: side;
+  justify-self: start;
+  position: relative;
+  z-index: 6;
+  width: 10px;
+  height: 100%;
+  margin-left: -5px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.sidebar-resizer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 2px;
+  background: transparent;
+  transition: background var(--transition);
+}
+
+.sidebar-resizer:hover::after,
+.sidebar-resizer:focus-visible::after,
+.is-resizing-sidebar .sidebar-resizer::after {
+  background: var(--accent);
+}
+
+.sidebar-resizer:focus-visible {
+  outline: none;
+}
+
+/* Mientras se arrastra: sin selección de texto y cursor fijo en toda la página. */
+.is-resizing-sidebar,
+.is-resizing-sidebar * {
+  cursor: col-resize !important;
+  user-select: none;
+}
+
+.sidebar {
+  grid-area: side;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ------------------------------- Responsivo ----------------------------- */
+@media (max-width: 1100px) {
+  .brand__title span {
+    font-size: var(--text-md);
+  }
+}
+
+@media (max-width: 880px) {
+  body {
+    overflow: auto;
+  }
+
+  .app {
+    height: auto;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+      "top"
+      "tools"
+      "work"
+      "side";
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .brand {
+    flex: 1 1 0;
+  }
+
+  .topbar__actions {
+    order: 2;
+  }
+
+  .topbar__file {
+    order: 3;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+  }
+
+  .filename {
+    flex: 1 1 140px;
+  }
+
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .toolbar__group {
+    flex-direction: row;
+    padding: 0 var(--space-2) 0 0;
+    border-bottom: 0;
+    border-right: 1px solid var(--border);
+  }
+
+  #tool-buttons {
+    flex-direction: row;
+  }
+
+  .workspace {
+    height: 72vh;
+    min-height: 420px;
+  }
+
+  .tool-options {
+    margin-left: 0;
+  }
+
+  .sidebar {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    overflow: visible;
+  }
+
+  .sidebar-resizer {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .brand__title {
+    font-size: var(--text-md);
+  }
+
+  .topbar__actions {
+    gap: 2px;
+  }
+
+  .viewport__hint {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .btn--claude {
+    width: 36px;
+    padding: 0;
+  }
+
+  .btn--claude span {
+    display: none;
+  }
+}

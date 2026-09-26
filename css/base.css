@@ -1,0 +1,127 @@
+/* ==========================================================================
+   base.css — Reinicio mínimo y estilos globales.
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--text-md);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden; /* la aplicación ocupa toda la ventana */
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+canvas {
+  display: block;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Foco visible solo con teclado */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Texto solo para lectores de pantalla */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Enlace para saltar al contenido (accesibilidad) */
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -40px;
+  z-index: 100;
+  padding: 8px 12px;
+  background: var(--accent);
+  color: var(--accent-text);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 8px;
+}
+
+.icon {
+  flex-shrink: 0;
+  display: block;
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 1px 6px;
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.noscript {
+  padding: var(--space-5);
+  text-align: center;
+}
+
+/* Respeta la preferencia de reducir animaciones */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

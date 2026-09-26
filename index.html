@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es-419">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editor de Skins de Minecraft</title>
+  <meta name="description" content="Editor de skins de Minecraft en 3D y 2D hecho con HTML, CSS, JavaScript y WebGL nativos. Compatible con Java y Bedrock (PNG 64×64).">
+  <meta name="theme-color" content="#f3f4f6">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%232f7f7a'/%3E%3Crect x='3' y='5' width='3' height='2' fill='%23fff'/%3E%3Crect x='10' y='5' width='3' height='2' fill='%23fff'/%3E%3Crect x='5' y='10' width='6' height='2' fill='%23143b38'/%3E%3C/svg%3E">
+
+  <!-- Aplica el tema guardado antes de pintar para evitar un "parpadeo". -->
+  <script>
+    try {
+      const saved = JSON.parse(localStorage.getItem('mse.theme'));
+      if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+    } catch (e) { /* sin almacenamiento: se usa el tema del sistema */ }
+  </script>
+
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#viewport">Saltar al área de edición</a>
+
+  <div class="app">
+    <!-- ============================ Encabezado ============================ -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand__logo" aria-hidden="true"></span>
+        <h1 class="brand__title"><span data-i18n="app.title"></span></h1>
+      </div>
+
+      <div class="topbar__file">
+        <div class="menu">
+          <button type="button" class="btn" id="btn-new" data-icon="filePlus" aria-haspopup="true" aria-expanded="false" aria-controls="menu-new"><span data-i18n="menu.new"></span></button>
+          <div class="menu__list" id="menu-new" role="menu" hidden>
+            <button type="button" role="menuitem" data-value="template" data-i18n="menu.newTemplate"></button>
+            <button type="button" role="menuitem" data-value="blank" data-i18n="menu.newBlank"></button>
+          </div>
+        </div>
+        <button type="button" class="btn" id="btn-open" data-icon="upload" data-i18n-title="menu.openTitle"><span data-i18n="menu.open"></span></button>
+        <input type="file" id="file-input" accept="image/png,image/*" hidden>
+        <label class="filename">
+          <span class="visually-hidden" data-i18n="menu.fileName"></span>
+          <input type="text" id="file-name" spellcheck="false" autocomplete="off" maxlength="48">
+          <span class="filename__ext" aria-hidden="true">.png</span>
+        </label>
+        <button type="button" class="btn btn--primary" id="btn-download" data-icon="download" data-i18n-title="menu.downloadTitle"><span data-i18n="menu.download"></span></button>
+      </div>
+
+      <div class="topbar__actions">
+        <button type="button" class="btn btn--claude" id="btn-claude" data-icon="sparkle" data-state="off"><span data-i18n="claude.button"></span></button>
+        <button type="button" class="btn btn--icon" id="btn-check" data-icon="check" data-i18n-title="menu.check"></button>
+        <button type="button" class="btn btn--icon" id="btn-help" data-icon="help" data-i18n-title="menu.help"></button>
+        <a class="btn btn--icon" href="docs/index.html" target="_blank" rel="noopener" data-icon="book" data-i18n-title="menu.docs"></a>
+        <button type="button" class="btn btn--icon" id="btn-theme" data-i18n-title="menu.theme"></button>
+      </div>
+    </header>
+
+    <!-- ======================= Barra de herramientas ====================== -->
+    <nav class="toolbar" aria-label="Herramientas">
+      <div class="toolbar__group" id="tool-buttons" role="radiogroup" data-i18n-title="tools.title"></div>
+      <div class="toolbar__group">
+        <button type="button" class="tool-btn" id="btn-undo" data-icon="undo" data-i18n-title="tools.undo" disabled></button>
+        <button type="button" class="tool-btn" id="btn-redo" data-icon="redo" data-i18n-title="tools.redo" disabled></button>
+      </div>
+      <div class="toolbar__group">
+        <button type="button" class="tool-btn" id="btn-mirror" data-icon="mirror" data-i18n-title="options.mirrorTitle" aria-pressed="false"></button>
+        <button type="button" class="tool-btn" id="btn-grid" data-icon="grid" data-i18n-title="options.gridTitle" aria-pressed="true"></button>
+      </div>
+    </nav>
+
+    <!-- ========================= Área de trabajo ========================== -->
+    <main class="workspace" id="workspace">
+      <div class="workspace__bar">
+        <div class="segmented" data-key="viewMode" role="group" data-i18n-title="views.tabs">
+          <button type="button" data-value="3d" data-icon="cube" data-icon-size="16"><span data-i18n="views.view3d"></span></button>
+          <button type="button" data-value="2d" data-icon="image" data-icon-size="16"><span data-i18n="views.view2d"></span></button>
+        </div>
+
+        <div class="tool-options">
+          <div class="option">
+            <span class="option__label" data-i18n="layers.active"></span>
+            <div class="segmented segmented--small" data-key="activeLayer" role="group">
+              <button type="button" data-value="base" data-i18n="layers.base"></button>
+              <button type="button" data-value="overlay" data-i18n="layers.overlay"></button>
+            </div>
+          </div>
+          <div class="option">
+            <span class="option__label" data-i18n="options.brushSize"></span>
+            <div class="segmented segmented--small" data-key="brushSize" role="group">
+              <button type="button" data-value="1">1</button>
+              <button type="button" data-value="2">2</button>
+              <button type="button" data-value="3">3</button>
+            </div>
+          </div>
+          <label class="option" id="opt-intensity-wrap">
+            <span class="option__label" data-i18n="options.intensity"></span>
+            <input type="range" id="opt-intensity" min="5" max="100" step="5">
+            <output id="opt-intensity-value" class="option__value"></output>
+          </label>
+          <label class="option option--check" data-i18n-title="options.dimInactiveTitle">
+            <input type="checkbox" id="opt-dim">
+            <span data-i18n="options.dimInactive"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="viewport" id="viewport">
+        <canvas id="canvas-3d" class="viewport__canvas" tabindex="0" aria-label="Vista 3D del personaje para editar"></canvas>
+        <canvas id="canvas-2d" class="viewport__canvas" tabindex="0" aria-label="Textura 2D de la skin para editar" hidden></canvas>
+
+        <div class="viewport__overlay viewport__views" id="camera-views" role="group" aria-label="Vistas de cámara">
+          <button type="button" class="chip" data-camera-view="front" data-i18n="views.front"></button>
+          <button type="button" class="chip" data-camera-view="back" data-i18n="views.back"></button>
+          <button type="button" class="chip" data-camera-view="right" data-i18n="views.right"></button>
+          <button type="button" class="chip" data-camera-view="left" data-i18n="views.left"></button>
+          <button type="button" class="chip" data-camera-view="top" data-i18n="views.top"></button>
+          <button type="button" class="chip" data-camera-view="bottom" data-i18n="views.bottom"></button>
+        </div>
+
+        <div class="viewport__overlay viewport__zoom" role="group" aria-label="Zoom">
+          <button type="button" class="btn btn--icon btn--floating" id="btn-zoom-in" data-icon="zoomIn" data-i18n-title="views.zoomIn"></button>
+          <button type="button" class="btn btn--icon btn--floating" id="btn-zoom-out" data-icon="zoomOut" data-i18n-title="views.zoomOut"></button>
+          <button type="button" class="btn btn--icon btn--floating" id="btn-view-reset" data-icon="reset" data-i18n-title="views.reset"></button>
+        </div>
+
+        <p class="viewport__hint" id="viewport-hint"></p>
+
+        <div class="dropzone" id="dropzone" hidden>
+          <div class="dropzone__box" data-icon="upload" data-icon-size="40"><span data-i18n="dialogs.dropHere"></span></div>
+        </div>
+      </div>
+
+      <footer class="statusbar" aria-live="off">
+        <span id="status-hover">—</span>
+        <span class="statusbar__spacer"></span>
+        <span id="status-zoom" hidden></span>
+        <button type="button" class="statusbar__claude" id="status-claude" data-state="off" hidden><span></span></button>
+        <span id="status-tool"></span>
+        <span id="status-model"></span>
+        <span id="status-save" class="statusbar__save"></span>
+      </footer>
+    </main>
+
+    <!-- ========================== Panel lateral =========================== -->
+    <!-- Borde arrastrable para cambiar el ancho del panel (ver sidebar-resizer.js). -->
+    <div class="sidebar-resizer" id="sidebar-resizer" role="separator" aria-orientation="vertical" aria-controls="sidebar" tabindex="0" data-i18n-title="layout.resize"></div>
+    <aside class="sidebar" id="sidebar" aria-label="Paneles">
+      <!-- Vista previa -->
+      <details class="panel" id="panel-preview" open>
+        <summary class="panel__header"><span data-i18n="preview.title"></span></summary>
+        <div class="panel__body">
+          <div class="preview">
+            <canvas id="canvas-preview" class="preview__canvas" aria-label="Vista previa 3D animada del personaje"></canvas>
+            <button type="button" class="btn btn--icon btn--floating preview__shot" id="btn-screenshot" data-icon="camera" data-i18n-title="preview.screenshot"></button>
+          </div>
+          <div class="preview__controls">
+            <label class="switch"><input type="checkbox" id="opt-autorotate"><span data-i18n="preview.autoRotate"></span></label>
+            <label class="switch"><input type="checkbox" id="opt-preview-overlay"><span data-i18n="preview.showOverlay"></span></label>
+            <label class="select-field">
+              <span data-i18n="preview.animation"></span>
+              <select id="opt-animation">
+                <option value="none" data-i18n="preview.anim.none"></option>
+                <option value="idle" data-i18n="preview.anim.idle"></option>
+                <option value="walk" data-i18n="preview.anim.walk"></option>
+                <option value="run" data-i18n="preview.anim.run"></option>
+                <option value="wave" data-i18n="preview.anim.wave"></option>
+              </select>
+            </label>
+          </div>
+          <p class="panel__hint" data-i18n="preview.hint"></p>
+        </div>
+      </details>
+
+      <!-- Color -->
+      <details class="panel" id="panel-color" open>
+        <summary class="panel__header"><span data-i18n="color.title"></span></summary>
+        <div class="panel__body">
+          <div class="color-slots">
+            <button type="button" class="color-slot color-slot--primary" id="color-primary" data-i18n-title="color.primary"></button>
+            <button type="button" class="color-slot color-slot--secondary" id="color-secondary" data-i18n-title="color.secondary"></button>
+            <button type="button" class="btn btn--icon btn--ghost" id="btn-swap-colors" data-icon="swap" data-icon-size="16" data-i18n-title="color.swap"></button>
+            <button type="button" class="btn btn--icon btn--ghost" id="btn-eyedropper" data-icon="picker" data-icon-size="16" data-i18n-title="color.eyedropper" hidden></button>
+          </div>
+
+          <div class="color-input">
+            <label class="color-input__field">
+              <span class="visually-hidden" data-i18n="color.input"></span>
+              <input type="text" id="color-input" spellcheck="false" autocomplete="off">
+            </label>
+            <label>
+              <span class="visually-hidden" data-i18n="color.format"></span>
+              <select id="color-format" class="color-input__format"></select>
+            </label>
+            <button type="button" class="btn btn--icon btn--ghost" id="btn-copy-color" data-icon="copy" data-icon-size="16" data-i18n-title="color.copy"></button>
+          </div>
+
+          <div class="sv-area" id="sv-area" role="slider" tabindex="0" data-i18n-title="color.saturation" aria-valuemin="0" aria-valuemax="100">
+            <span class="sv-area__handle" id="sv-handle"></span>
+          </div>
+          <label class="range-field">
+            <span class="visually-hidden" data-i18n="color.hue"></span>
+            <input type="range" class="range range--hue" id="hue-range" min="0" max="359" step="1">
+          </label>
+          <label class="range-field range-field--alpha">
+            <span class="range-field__label" data-i18n="color.alpha"></span>
+            <input type="range" class="range range--alpha" id="alpha-range" min="0" max="255" step="1">
+            <output id="alpha-value" class="option__value"></output>
+          </label>
+
+          <div class="color-values" id="color-values" role="group" data-i18n-title="color.values"></div>
+
+          <div class="palette">
+            <div class="palette__group">
+              <span class="palette__label" data-i18n="color.recent"></span>
+              <div class="palette__row" id="palette-recent"></div>
+            </div>
+            <div class="palette__group">
+              <div class="palette__head">
+                <span class="palette__label" data-i18n="color.skinColors"></span>
+                <div class="palette__tools">
+                  <div class="segmented segmented--tiny" data-key="colorGrouping" role="group" data-i18n-title="color.grouping">
+                    <button type="button" data-value="exact" data-i18n="color.groupingModes.exact"></button>
+                    <button type="button" data-value="similar" data-i18n="color.groupingModes.similar"></button>
+                    <button type="button" data-value="wide" data-i18n="color.groupingModes.wide"></button>
+                  </div>
+                  <div class="menu">
+                    <button type="button" class="btn btn--icon btn--tiny" id="btn-skin-palette" data-icon="download" data-icon-size="15" aria-haspopup="true" aria-expanded="false" aria-controls="menu-skin-palette" data-i18n-title="color.downloadPalette"></button>
+                    <div class="menu__list menu__list--end" id="menu-skin-palette" role="menu" hidden>
+                      <button type="button" role="menuitem" data-value="png" data-i18n="color.paletteMenu.png"></button>
+                      <button type="button" role="menuitem" data-value="gpl" data-i18n="color.paletteMenu.gpl"></button>
+                      <button type="button" role="menuitem" data-value="json" data-i18n="color.paletteMenu.json"></button>
+                      <button type="button" role="menuitem" data-value="txt" data-i18n="color.paletteMenu.txt"></button>
+                      <button type="button" role="menuitem" data-value="copy" data-i18n="color.paletteMenu.copy"></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="skin-colors" id="palette-skin"></div>
+            </div>
+            <div id="palette-presets"></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Armonías y tonos (teoría del color) -->
+      <details class="panel" id="panel-theory" open>
+        <summary class="panel__header"><span data-i18n="theory.title"></span></summary>
+        <div class="panel__body">
+          <div class="theory-block">
+            <div class="theory-block__head">
+              <span class="palette__label" data-i18n="theory.scale"></span>
+              <div class="segmented segmented--tiny" data-key="scaleMode" role="group" data-i18n-title="theory.scaleModeHint">
+                <button type="button" data-value="linear" data-i18n="theory.scaleModes.linear"></button>
+                <button type="button" data-value="pixelart" data-i18n="theory.scaleModes.pixelart"></button>
+              </div>
+            </div>
+            <div class="tone-strip" id="tone-strip" role="group" data-i18n-title="theory.scaleHint"></div>
+          </div>
+
+          <div class="theory-block">
+            <label class="select-field">
+              <span data-i18n="theory.harmony"></span>
+              <select id="harmony-select"></select>
+            </label>
+            <div class="harmony">
+              <div class="harmony__wheel-wrap">
+                <canvas class="harmony__wheel" id="harmony-wheel" tabindex="0" role="slider" data-i18n-title="theory.wheel"></canvas>
+                <p class="harmony__readout" id="harmony-readout" aria-hidden="true"></p>
+                <label class="range-field">
+                  <span class="range-field__label" data-i18n="theory.lightness"></span>
+                  <input type="range" class="range range--lightness" id="harmony-lightness" min="0" max="100" step="1">
+                </label>
+              </div>
+              <div class="harmony__swatches" id="harmony-swatches"></div>
+            </div>
+            <p class="panel__hint" id="harmony-description"></p>
+          </div>
+
+          <div class="theory-actions">
+            <button type="button" class="btn btn--small" id="btn-random-palette" data-icon="shuffle" data-icon-size="16" data-i18n-title="theory.randomTitle"><span data-i18n="theory.random"></span></button>
+            <div class="menu">
+              <button type="button" class="btn btn--small btn--primary" id="btn-export-colors" data-icon="share" data-icon-size="16" aria-haspopup="true" aria-expanded="false" aria-controls="menu-export" data-i18n-title="theory.exportTitle"><span data-i18n="theory.export"></span></button>
+              <div class="menu__list menu__list--up menu__list--end" id="menu-export" role="menu" hidden>
+                <button type="button" role="menuitem" data-value="copyHex" data-i18n="theory.exportMenu.copyHex"></button>
+                <button type="button" role="menuitem" data-value="copyCss" data-i18n="theory.exportMenu.copyCss"></button>
+                <button type="button" role="menuitem" data-value="png" data-i18n="theory.exportMenu.png"></button>
+                <button type="button" role="menuitem" data-value="gpl" data-i18n="theory.exportMenu.gpl"></button>
+                <button type="button" role="menuitem" data-value="json" data-i18n="theory.exportMenu.json"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Capas y partes -->
+      <details class="panel" id="panel-layers" open>
+        <summary class="panel__header"><span data-i18n="layers.title"></span></summary>
+        <div class="panel__body">
+          <p class="panel__hint" data-i18n="layers.toggleHint"></p>
+          <div class="figures" id="layer-figures"></div>
+          <button type="button" class="btn btn--small btn--block" id="btn-show-all" data-icon="eye" data-icon-size="16"><span data-i18n="layers.showAll"></span></button>
+        </div>
+      </details>
+
+      <!-- Modelo -->
+      <details class="panel" id="panel-model" open>
+        <summary class="panel__header"><span data-i18n="model.title"></span></summary>
+        <div class="panel__body">
+          <div class="radio-cards" role="radiogroup">
+            <label class="radio-card">
+              <input type="radio" name="model" value="classic">
+              <span class="radio-card__title" data-i18n="model.classic"></span>
+              <span class="radio-card__hint" data-i18n="model.classicHint"></span>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="model" value="slim">
+              <span class="radio-card__title" data-i18n="model.slim"></span>
+              <span class="radio-card__hint" data-i18n="model.slimHint"></span>
+            </label>
+          </div>
+          <label class="option option--check"><input type="checkbox" id="opt-adapt-arms"><span data-i18n="model.adaptArms"></span></label>
+        </div>
+      </details>
+
+      <!-- Acciones -->
+      <details class="panel" id="panel-actions">
+        <summary class="panel__header"><span data-i18n="actions.title"></span></summary>
+        <div class="panel__body panel__body--stack">
+          <button type="button" class="btn btn--small btn--block" id="btn-mirror-rl" data-icon="mirror" data-icon-size="16"><span data-i18n="actions.mirrorRL"></span></button>
+          <button type="button" class="btn btn--small btn--block" id="btn-mirror-lr" data-icon="mirror" data-icon-size="16"><span data-i18n="actions.mirrorLR"></span></button>
+          <label class="option option--check"><input type="checkbox" id="opt-only-active" checked><span data-i18n="actions.onlyActiveLayer"></span></label>
+          <button type="button" class="btn btn--small btn--block btn--danger-outline" id="btn-clear-overlay" data-icon="trash" data-icon-size="16"><span data-i18n="actions.clearOverlay"></span></button>
+          <button type="button" class="btn btn--small btn--block btn--danger-outline" id="btn-clear-base" data-icon="trash" data-icon-size="16"><span data-i18n="actions.clearBase"></span></button>
+        </div>
+      </details>
+    </aside>
+  </div>
+
+  <!-- ============================== Diálogos ============================== -->
+  <dialog id="dialog-confirm" class="dialog">
+    <form method="dialog" class="dialog__inner">
+      <h2 class="dialog__title" data-slot="title"></h2>
+      <p class="dialog__body" data-slot="body"></p>
+      <div class="dialog__actions">
+        <button class="btn" value="cancel" data-i18n="dialogs.cancel"></button>
+        <button class="btn btn--primary" value="confirm" data-action="confirm"></button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialog-help" class="dialog dialog--wide">
+    <form method="dialog" class="dialog__inner">
+      <header class="dialog__header">
+        <h2 class="dialog__title" data-i18n="dialogs.helpTitle"></h2>
+        <button class="btn btn--icon btn--ghost" value="close" data-icon="close" data-i18n-title="dialogs.close"></button>
+      </header>
+      <div class="shortcuts" id="shortcuts-content"></div>
+    </form>
+  </dialog>
+
+  <dialog id="dialog-check" class="dialog">
+    <form method="dialog" class="dialog__inner">
+      <header class="dialog__header">
+        <h2 class="dialog__title" data-slot="title"></h2>
+        <button class="btn btn--icon btn--ghost" value="close" data-icon="close" data-i18n-title="dialogs.close"></button>
+      </header>
+      <ul class="report" data-slot="list"></ul>
+      <div class="dialog__actions">
+        <button class="btn btn--primary" value="close" data-i18n="dialogs.close"></button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialog-claude" class="dialog dialog--claude" aria-labelledby="claude-title">
+    <div class="dialog__inner">
+      <header class="dialog__header">
+        <h2 class="dialog__title" id="claude-title" data-i18n="claude.title"></h2>
+        <form method="dialog"><button class="btn btn--icon btn--ghost" value="close" data-icon="close" data-i18n-title="dialogs.close"></button></form>
+      </header>
+      <p class="dialog__body" data-i18n="claude.intro"></p>
+
+      <ol class="claude-steps">
+        <li>
+          <span data-i18n="claude.step1"></span>
+          <div class="claude-url">
+            <code id="claude-mcp-url"></code>
+            <button type="button" class="btn btn--small" id="btn-claude-copy-url" data-icon="copy" data-icon-size="15"><span data-i18n="claude.copyUrl"></span></button>
+          </div>
+          <small class="panel__hint" data-i18n="claude.step1Hint"></small>
+        </li>
+        <li><span data-i18n="claude.step2"></span></li>
+        <li><span data-i18n="claude.step3"></span></li>
+      </ol>
+
+      <div class="claude-status" id="claude-status" data-state="off" role="status">
+        <span class="claude-status__dot" aria-hidden="true"></span>
+        <span id="claude-status-text"></span>
+      </div>
+
+      <div class="claude-code" id="claude-code" hidden>
+        <span class="claude-code__label" data-i18n="claude.codeLabel"></span>
+        <strong class="claude-code__value" id="claude-code-value"></strong>
+        <div class="claude-code__actions">
+          <button type="button" class="btn btn--small" id="btn-claude-copy-code" data-icon="copy" data-icon-size="15"><span data-i18n="claude.copyCode"></span></button>
+          <button type="button" class="btn btn--small" id="btn-claude-copy-message" data-icon="copy" data-icon-size="15"><span data-i18n="claude.copyMessage"></span></button>
+        </div>
+      </div>
+
+      <section class="claude-log">
+        <h3 data-i18n="claude.activity"></h3>
+        <ul class="claude-activity" id="claude-activity" aria-live="polite"></ul>
+      </section>
+
+      <details class="claude-advanced">
+        <summary data-i18n="claude.advanced"></summary>
+        <label class="claude-advanced__field">
+          <span data-i18n="claude.server"></span>
+          <input type="url" id="claude-server-url" spellcheck="false" autocomplete="off">
+        </label>
+        <button type="button" class="btn btn--small" id="btn-claude-save-server"><span data-i18n="claude.saveServer"></span></button>
+      </details>
+
+      <div class="dialog__actions">
+        <button type="button" class="btn btn--danger-outline" id="btn-claude-disconnect" hidden><span data-i18n="claude.disconnect"></span></button>
+        <button type="button" class="btn btn--primary" id="btn-claude-connect"><span data-i18n="claude.connect"></span></button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <noscript>
+    <p class="noscript">Este editor necesita JavaScript activado.</p>
+  </noscript>
+</body>
+</html>

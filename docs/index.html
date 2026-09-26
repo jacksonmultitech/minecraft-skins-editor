@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="es-419">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Documentación · Editor de Skins de Minecraft</title>
+  <meta name="description" content="Guía completa del Editor de Skins de Minecraft: uso, herramientas, formato de skins compatible con Java y Bedrock, arquitectura del código y guía para desarrolladores.">
+  <script>
+    try {
+      const saved = JSON.parse(localStorage.getItem('mse.theme'));
+      if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+    } catch (e) { /* sin almacenamiento */ }
+  </script>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="docs.css">
+  <script type="module" src="docs.js"></script>
+</head>
+<body>
+  <header class="doc-header">
+    <p class="doc-header__title">Editor de Skins <span>· Documentación</span></p>
+    <button type="button" class="doc-btn" id="doc-theme">Tema</button>
+    <a class="doc-btn doc-btn--primary" href="../index.html">Abrir el editor</a>
+  </header>
+
+  <div class="doc-layout">
+    <nav class="toc" aria-label="Índice">
+      <p class="toc__title">Contenido</p>
+      <ol>
+        <li><a href="#introduccion">Introducción</a></li>
+        <li><a href="#inicio">Inicio rápido</a></li>
+        <li><a href="#interfaz">La interfaz</a></li>
+        <li><a href="#herramientas">Herramientas</a></li>
+        <li><a href="#color">Color y teoría del color</a></li>
+        <li><a href="#camara">Cámara y navegación</a></li>
+        <li><a href="#capas">Capas, partes y modelo</a></li>
+        <li><a href="#preview">Vista previa</a></li>
+        <li><a href="#archivos">Abrir y descargar</a></li>
+        <li><a href="#formato">Formato de skin</a></li>
+        <li><a href="#juego">Usar tu skin en el juego</a></li>
+        <li><a href="#claude">Conectar con Claude (MCP)</a></li>
+        <li><a href="#atajos">Atajos de teclado</a></li>
+        <li><a href="#arquitectura">Arquitectura del código</a></li>
+        <li><a href="#desarrollo">Guía para desarrolladores</a></li>
+        <li><a href="#compatibilidad">Navegadores compatibles</a></li>
+        <li><a href="#faq">Preguntas frecuentes</a></li>
+        <li><a href="#referencias">Referencias</a></li>
+      </ol>
+    </nav>
+
+    <main class="content">
+      <div class="hero">
+        <h1>Editor de Skins de Minecraft</h1>
+        <p>Crea y edita skins en 3D o en 2D directamente en el navegador. Hecho solo con HTML, CSS, JavaScript y WebGL nativos: sin frameworks, sin librerías y sin instalación.</p>
+        <div class="hero__actions">
+          <a class="doc-btn doc-btn--primary" href="../index.html">Empezar a editar</a>
+          <a class="doc-btn" href="#formato">Ver el formato de skin</a>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="introduccion">
+        <h2>1. Introducción</h2>
+        <p>Este editor produce archivos <strong>PNG de 64×64 píxeles con canal alfa (RGBA)</strong>, el formato que aceptan Minecraft: Java Edition (1.8 en adelante) y Minecraft: Bedrock Edition. Puedes empezar desde una plantilla, desde cero o abriendo una skin que ya tengas.</p>
+        <ul class="features">
+          <li><strong>Edición en 3D y 2D</strong>Pinta directamente sobre el personaje o sobre la textura plana, con guías de cada zona.</li>
+          <li><strong>Cámara libre</strong>Gira, desplaza y acerca con el mouse, el teclado o gestos táctiles.</li>
+          <li><strong>8 herramientas</strong>Lápiz, borrador, cubeta, cuentagotas, aclarar, oscurecer, ruido y reemplazar color.</li>
+          <li><strong>Teoría del color</strong>Armonías con círculo cromático, escala tonal estilo pixel art, valores HEX/RGB/HSL/OKLCH y exportación de paletas.</li>
+          <li><strong>Modo espejo</strong>Pinta los dos lados del cuerpo a la vez, calculado geométricamente.</li>
+          <li><strong>Vista previa animada</strong>Mira tu personaje caminar, correr o saludar, y gíralo a tu gusto.</li>
+          <li><strong>Compatibilidad</strong>Convierte skins antiguas de 64×32, detecta el modelo delgado y verifica problemas antes de descargar.</li>
+          <li><strong>Tema claro y oscuro</strong>Sigue la preferencia del sistema o elígelo manualmente.</li>
+          <li><strong>Guardado automático</strong>Tu trabajo se guarda en el navegador mientras editas.</li>
+        </ul>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="inicio">
+        <h2>2. Inicio rápido</h2>
+        <p>El editor usa <strong>módulos de JavaScript</strong> (<code>&lt;script type="module"&gt;</code>). Por seguridad, los navegadores no cargan módulos si abres el archivo con doble clic (<code>file://</code>), así que necesitas un servidor local. Cualquiera de estas opciones funciona:</p>
+        <pre><code># Opción 1: Python (viene instalado en macOS y la mayoría de Linux)
+cd editor-skins-minecraft
+python3 -m http.server 8080
+
+# Opción 2: Node.js
+npx serve .
+
+# Opción 3: Visual Studio Code
+#   Instala la extensión "Live Server" y elige "Open with Live Server" en index.html</code></pre>
+        <p>Luego abre <code>http://localhost:8080</code> en tu navegador.</p>
+        <h3>Tu primera skin en 5 pasos</h3>
+        <ol>
+          <li>Elige <strong>Nuevo → Desde plantilla</strong> (o <strong>Abrir</strong> para cargar tu PNG).</li>
+          <li>Selecciona un color en el panel <strong>Color</strong> y pinta con el <strong>Lápiz</strong> (<kbd>P</kbd>) sobre el modelo.</li>
+          <li>Gira la cámara con clic derecho y arrastrar; acerca con la rueda del mouse.</li>
+          <li>Cambia a la <strong>capa externa</strong> para añadir sombreros, capuchas o chaquetas con volumen.</li>
+          <li>Escribe un nombre y pulsa <strong>Descargar</strong> (<kbd>Ctrl</kbd>+<kbd>S</kbd>).</li>
+        </ol>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="interfaz">
+        <h2>3. La interfaz</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Zona</th><th>Qué contiene</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Encabezado</strong></td><td>Nuevo, Abrir, nombre del archivo, Descargar, verificación de compatibilidad, atajos, documentación y cambio de tema.</td></tr>
+              <tr><td><strong>Barra de herramientas</strong> (izquierda)</td><td>Las 8 herramientas, Deshacer/Rehacer, modo Espejo y Cuadrícula. La letra pequeña de cada botón es su atajo.</td></tr>
+              <tr><td><strong>Barra de opciones</strong> (arriba del lienzo)</td><td>Alternar <em>Modelo 3D</em> / <em>Textura 2D</em>, capa a editar, tamaño del pincel (1 a 3 px), intensidad y "Atenuar capa inactiva".</td></tr>
+              <tr><td><strong>Área de edición</strong></td><td>El lienzo. En 3D incluye botones de vista rápida (Frente, Atrás, Derecha…) y controles de zoom.</td></tr>
+              <tr><td><strong>Barra de estado</strong> (abajo)</td><td>Parte, cara, capa y coordenadas del píxel bajo el cursor; herramienta y modelo activos; estado del guardado automático.</td></tr>
+              <tr><td><strong>Panel lateral</strong> (derecha)</td><td>Vista previa, Color, Armonías y tonos, Capas y partes, Modelo y Acciones. Cada sección se puede contraer.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Cambiar el ancho del panel lateral</h3>
+        <p>Acerca el mouse al borde izquierdo del panel lateral: aparece una línea de color y el cursor cambia a <em>↔</em>. Arrastra para ensancharlo o angostarlo. El ancho va de <strong>280 px</strong> a <strong>640 px</strong>, y nunca supera el 45 % de la ventana para no tapar el lienzo. El editor recuerda el ancho que elijas; con <strong>doble clic</strong> sobre el borde vuelves al ancho original.</p>
+        <p>Con teclado: enfoca el borde con <kbd>Tab</kbd> y usa <kbd>←</kbd> para ensanchar, <kbd>→</kbd> para angostar (con <kbd>Mayús</kbd>, pasos más grandes), <kbd>Inicio</kbd> / <kbd>Fin</kbd> para el mínimo y el máximo, y <kbd>Enter</kbd> para restablecer.</p>
+        <div class="callout">
+          <strong>Diseñado para 1080p</strong>
+          <p>La medida base es un monitor de 1920×1080. Con ese tamaño el panel lateral mide unos 365 px y el lienzo ocupa el resto. La interfaz también se ajusta a pantallas de 1366 px o con escalado del 125 % (1536 px), y en celulares los paneles pasan debajo del lienzo.</p>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="herramientas">
+        <h2>4. Herramientas</h2>
+        <p>Todas las herramientas trabajan sobre los píxeles de la textura, por lo que se comportan igual en la vista 3D y en la 2D.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Herramienta</th><th>Atajo</th><th>Qué hace</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Lápiz</strong></td><td><kbd>P</kbd></td><td>Pinta con el color principal. Mantén <kbd>Mayús</kbd> y haz clic para trazar una línea recta desde el último punto (dentro de la misma cara).</td></tr>
+              <tr><td><strong>Borrador</strong></td><td><kbd>E</kbd></td><td>Vuelve transparentes los píxeles. Ideal para la capa externa.</td></tr>
+              <tr><td><strong>Cubeta de relleno</strong></td><td><kbd>F</kbd></td><td>Rellena el área contigua del mismo color, sin salirse de la cara donde hiciste clic. Con <kbd>Mayús</kbd>+clic rellena la cara completa.</td></tr>
+              <tr><td><strong>Cuentagotas</strong></td><td><kbd>I</kbd></td><td>Toma el color visible bajo el cursor. Con cualquier herramienta, <kbd>Alt</kbd>+clic hace lo mismo.</td></tr>
+              <tr><td><strong>Aclarar</strong></td><td><kbd>L</kbd></td><td>Aclara cada píxel una vez por trazo, según la <em>intensidad</em>. Útil para brillos.</td></tr>
+              <tr><td><strong>Oscurecer</strong></td><td><kbd>D</kbd></td><td>Oscurece cada píxel una vez por trazo. Útil para sombras y pliegues.</td></tr>
+              <tr><td><strong>Pincel de ruido</strong></td><td><kbd>N</kbd></td><td>Pinta el color principal con pequeñas variaciones de brillo al azar: da textura de tela, cabello o piel.</td></tr>
+              <tr><td><strong>Reemplazar color</strong></td><td><kbd>R</kbd></td><td>Cambia <em>todos</em> los píxeles de ese color exacto (en la misma capa) por el color principal.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Opciones que ayudan a crear</h3>
+        <ul>
+          <li><strong>Tamaño del pincel</strong> (<kbd>[</kbd> y <kbd>]</kbd>): 1, 2 o 3 píxeles. El pincel nunca se "derrama" a otra cara de la textura.</li>
+          <li><strong>Espejo</strong> (<kbd>M</kbd>): lo que pintas en el lado derecho aparece reflejado en el izquierdo y viceversa. El píxel simétrico se resalta con un borde punteado.</li>
+          <li><strong>Cuadrícula</strong> (<kbd>G</kbd>): muestra el borde de cada píxel. Si editas la capa externa, también dibuja los píxeles vacíos para que sepas dónde pintar.</li>
+          <li><strong>Atenuar capa inactiva</strong>: al editar la base, la capa externa se ve semitransparente para no tapar lo que pintas.</li>
+          <li><strong>Colores</strong>: selector de tono/saturación/brillo, opacidad, entrada en HEX, RGB, HSL u OKLCH, paletas de piel, cabello y ropa, los colores de tu skin agrupados y los recientes. <kbd>X</kbd> intercambia el color principal y el secundario. Todo se detalla en <a href="#color">Color y teoría del color</a>.</li>
+          <li><strong>Acciones</strong>: copiar un lado del cuerpo sobre el otro de forma simétrica y limpiar una capa completa.</li>
+        </ul>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="color">
+        <h2>5. Color y teoría del color</h2>
+        <h3>Elegir y escribir colores</h3>
+        <ul>
+          <li><strong>Selector</strong>: cuadro de saturación y brillo, barra de tono y control de opacidad (la opacidad solo tiene sentido en la capa externa).</li>
+          <li><strong>Campo de color</strong>: muestra el color en el formato elegido (HEX, RGB, HSL u OKLCH) y acepta cualquiera de ellos al escribir: <code>#F54927</code>, <code>rgb(245 73 39)</code>, <code>hsl(10 91% 56%)</code>, <code>oklch(65% 0.21 33)</code> o un nombre CSS como <code>tomato</code>. El botón de al lado copia el valor.</li>
+          <li><strong>Valores</strong>: debajo de la opacidad verás el color en los cuatro formatos a la vez. Haz clic en cualquiera para copiarlo.</li>
+          <li><strong>Cuentagotas de pantalla</strong>: en Chrome y Edge aparece un botón para tomar un color de cualquier parte de la pantalla (API nativa <code>EyeDropper</code>). En otros navegadores el botón no se muestra.</li>
+        </ul>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Formato</th><th>Qué describe</th><th>Cuándo usarlo</th></tr></thead>
+            <tbody>
+              <tr><td>HEX</td><td>Rojo, verde y azul en hexadecimal (00–FF)</td><td>Compartir colores y pegarlos en otros editores.</td></tr>
+              <tr><td>RGB</td><td>Rojo, verde y azul de 0 a 255</td><td>Programas que piden valores numéricos.</td></tr>
+              <tr><td>HSL</td><td>Tono (0–360°), saturación y luminosidad (%)</td><td>Cambiar el tono sin tocar lo demás. Es el círculo que usan las armonías.</td></tr>
+              <tr><td>OKLCH</td><td>Luminosidad, croma y tono perceptuales</td><td>Pasos que se ven iguales al ojo. Lo usan la escala tonal y la agrupación de colores.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Colores de tu skin</h3>
+        <p>La paleta lee todos los píxeles visibles de la skin y los organiza en tres pasos:</p>
+        <ol>
+          <li><strong>Une los tonos casi iguales.</strong> Una textura con ruido puede tener decenas de variantes que apenas se distinguen. Se juntan en una sola muestra (la más usada) y una marca en la esquina indica que representa varios tonos. Pasa el cursor para ver cuántos píxeles y tonos agrupa.</li>
+          <li><strong>Los clasifica por familia</strong> según su tono: rojos, naranjas y marrones, amarillos, verdes, turquesas, azules, morados, rosas y neutros (grises, blanco y negro). Las familias siguen el orden del círculo cromático.</li>
+          <li><strong>Ordena cada familia de claro a oscuro</strong>, así cada fila funciona como una rampa de sombreado.</li>
+        </ol>
+        <p>El control <strong>Exacto / Similares / Amplio</strong> decide cuánto se agrupa: <em>Exacto</em> muestra cada color distinto, <em>Similares</em> une diferencias casi imperceptibles y <em>Amplio</em> junta tonos parecidos aunque se noten.</p>
+        <h3>Descargar la paleta de tu skin</h3>
+        <p>El botón de descarga junto a <strong>Colores de tu skin</strong> guarda todos los colores que usa tu skin, organizados por familia y con el nivel de agrupación elegido (sin el límite de muestras de la pantalla):</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Opción</th><th>Para qué sirve</th></tr></thead>
+            <tbody>
+              <tr><td>Imagen PNG</td><td>Una lámina con una fila por familia y el código de cada color. Útil como referencia visual.</td></tr>
+              <tr><td>Paleta GIMP / Aseprite (<code>.gpl</code>)</td><td>Se importa como paleta en GIMP, Aseprite, Krita o Inkscape para seguir pintando con los mismos colores.</td></tr>
+              <tr><td>JSON</td><td>Cada color en HEX, RGB, HSL y OKLCH, con los píxeles que ocupa y cuántos tonos une.</td></tr>
+              <tr><td>Lista HEX (<code>.txt</code>) / Copiar</td><td>Los códigos agrupados por familia, como texto.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="callout">Dentro de claude.ai la opción <code>.gpl</code> se oculta, porque ahí solo se pueden descargar algunos tipos de archivo. En tu computadora aparece normalmente.</p>
+
+        <h3>Escala tonal</h3>
+        <p>En el panel <strong>Armonías y tonos</strong> se genera una escala de 11 pasos del color principal, del más claro al más oscuro. El punto blanco o negro marca tu color. Tiene dos modos:</p>
+        <ul>
+          <li><strong>Normal</strong>: solo cambia la luminosidad (en OKLCH), con un poco menos de croma en los extremos.</li>
+          <li><strong>Pixel art</strong>: además desplaza el tono. Las sombras tiran hacia el azul o violeta y las luces hacia el amarillo, la técnica que usan los artistas de pixel art para sombrear con más vida que solo oscurecer.</li>
+        </ul>
+
+        <h3>Armonías y círculo cromático interactivo</h3>
+        <p>Una armonía es un grupo de colores elegidos por su posición en el círculo cromático. Se calculan girando el tono en HSL y conservando la saturación y la luminosidad del color base.</p>
+        <p>El círculo es un disco de color que puedes manipular directamente:</p>
+        <ul>
+          <li><strong>El ángulo es el tono</strong> (0° arriba, en sentido horario) y <strong>la distancia al centro es la saturación</strong>: en el borde, el color más vivo; en el centro, gris.</li>
+          <li><strong>Arrastra cualquier punto</strong>. Si mueves el punto base (el más grande), cambias el color principal; si mueves otro punto, toda la armonía gira con él y conserva sus distancias.</li>
+          <li><strong>Haz clic en cualquier lugar del disco</strong> para llevar allí el punto base.</li>
+          <li>La barra <strong>Luminosidad</strong> aclara u oscurece todos los colores; el disco se redibuja con esa luminosidad para mostrar exactamente los colores que obtendrás.</li>
+          <li>Con teclado: enfoca el disco y usa <kbd>←</kbd> / <kbd>→</kbd> para el tono y <kbd>↑</kbd> / <kbd>↓</kbd> para la saturación (con <kbd>Mayús</kbd>, pasos de 15).</li>
+        </ul>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Armonía</th><th>Tonos (respecto al base)</th><th>Uso sugerido en una skin</th></tr></thead>
+            <tbody>
+              <tr><td>Análogos</td><td>0°, −30°, +30°</td><td>Ropa y cabello tranquilos y naturales.</td></tr>
+              <tr><td>Complementario</td><td>0°, 180°</td><td>Detalles que deben resaltar (cinturón, ojos, emblema).</td></tr>
+              <tr><td>Complementario dividido</td><td>0°, 150°, 210°</td><td>Contraste fuerte pero más fácil de equilibrar.</td></tr>
+              <tr><td>Complementario dividido doble</td><td>0°, ±30°, 150°, 210°</td><td>Paletas ricas: uno principal y el resto en detalles.</td></tr>
+              <tr><td>Triádico</td><td>0°, 120°, 240°</td><td>Personajes coloridos y equilibrados.</td></tr>
+              <tr><td>Tetrádico (cuadrado)</td><td>0°, 90°, 180°, 270°</td><td>Mucha variedad; deja que un color domine.</td></tr>
+              <tr><td>Rectángulo</td><td>0°, 60°, 180°, 240°</td><td>Dos pares complementarios con buen contraste.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Haz clic en cualquier color de la escala o de la armonía para usarlo como color principal (se conserva la opacidad actual).</p>
+
+        <h3>Paleta aleatoria y exportar</h3>
+        <ul>
+          <li><strong>Paleta aleatoria</strong> elige un color base agradable (sin grises apagados ni saturación extrema) y una armonía al azar.</li>
+          <li><strong>Exportar colores</strong> guarda la armonía y la escala tonal actuales: copiar la lista HEX, copiar variables CSS, o descargar una imagen PNG, una paleta <code>.gpl</code> o un JSON con cada color en HEX, RGB, HSL y OKLCH.</li>
+        </ul>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="camara">
+        <h2>6. Cámara y navegación</h2>
+        <h3>Vista 3D</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Acción</th><th>Mouse / teclado</th><th>Pantalla táctil</th></tr></thead>
+            <tbody>
+              <tr><td>Pintar</td><td>Clic izquierdo sobre el modelo</td><td>Tocar el modelo</td></tr>
+              <tr><td>Girar</td><td>Clic derecho + arrastrar, o clic izquierdo en el fondo + arrastrar, o flechas</td><td>Arrastrar sobre el fondo</td></tr>
+              <tr><td>Desplazar (paneo)</td><td>Clic central + arrastrar, <kbd>Mayús</kbd>+clic derecho, o <kbd>Espacio</kbd>+arrastrar</td><td>Arrastrar con dos dedos</td></tr>
+              <tr><td>Zoom</td><td>Rueda del mouse, botones + / − o teclas <kbd>+</kbd> / <kbd>-</kbd></td><td>Pellizcar</td></tr>
+              <tr><td>Vistas rápidas</td><td><kbd>1</kbd> frente · <kbd>2</kbd> atrás · <kbd>3</kbd> derecha · <kbd>4</kbd> izquierda · <kbd>5</kbd> arriba · <kbd>6</kbd> abajo · <kbd>0</kbd> reiniciar</td><td>Botones sobre el lienzo</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">
+          <strong>Zoom solo con la rueda</strong>
+          <p>La cámara se acerca y se aleja únicamente con la rueda del mouse. <kbd>Ctrl</kbd>+rueda no se intercepta: sigue funcionando como el zoom normal de la página del navegador.</p>
+        </div>
+        <h3>Vista 2D</h3>
+        <p>Se desplaza con clic derecho, clic central o <kbd>Espacio</kbd>+arrastrar, y se acerca con la rueda del mouse (el zoom se centra en el cursor). El botón de reinicio ajusta la textura a la pantalla. Las zonas grises son áreas que el juego no usa: ahí no se puede pintar.</p>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="capas">
+        <h2>7. Capas, partes y modelo</h2>
+        <h3>Capas</h3>
+        <p>Cada parte del cuerpo tiene dos capas:</p>
+        <ul>
+          <li><strong>Base (interna)</strong>: el cuerpo en sí. En Java se dibuja siempre opaca.</li>
+          <li><strong>Externa</strong>: una "cáscara" ligeramente más grande (1 píxel más en la cabeza y 0,5 en el resto) para sombreros, capuchas, chaquetas, mangas o pantalones con volumen. Puede tener transparencia.</li>
+        </ul>
+        <p>Elige qué capa editar en la barra de opciones o con <kbd>C</kbd>. En 3D solo se pinta sobre la capa activa; así puedes pintar la base aunque la externa esté visible.</p>
+        <h3>Visibilidad por partes</h3>
+        <p>En el panel <strong>Capas y partes</strong> hay dos muñecos (Base y Externa). Haz clic en una parte para ocultarla o mostrarla; por ejemplo, oculta los brazos para pintar los costados del torso. Debajo de cada muñeco, el botón <strong>Ocultar capa</strong> esconde todas las partes de esa capa de una vez (y cambia a <strong>Mostrar capa</strong> para volver a verlas). <strong>Mostrar todo</strong> hace visibles las dos capas completas, y <kbd>O</kbd> alterna la capa externa.</p>
+        <h3>Modelo clásico y delgado</h3>
+        <p>Minecraft tiene dos modelos: <strong>Clásico</strong> (brazos de 4 px, como "Steve") y <strong>Delgado</strong> (brazos de 3 px, como "Alex"). Al abrir una skin el editor detecta el modelo automáticamente. Si cambias de modelo con la opción <em>Adaptar la textura de los brazos</em> activada, el diseño de los brazos se reajusta para no quedar desplazado.</p>
+        <div class="callout callout--warning">
+          <strong>Importante</strong>
+          <p>El PNG no guarda qué modelo usa. Al subir la skin al juego debes elegir el mismo modelo (Clásico o Delgado) con el que la diseñaste.</p>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="preview">
+        <h2>8. Vista previa</h2>
+        <p>El panel <strong>Vista previa</strong> muestra el personaje tal como se verá en el juego: sin cuadrícula, con la base opaca y la capa externa encima.</p>
+        <ul>
+          <li><strong>Arrastra</strong> para girarlo, usa la <strong>rueda</strong> para acercarte y haz <strong>doble clic</strong> para reiniciar la cámara.</li>
+          <li><strong>Animación</strong>: sin animación, en reposo, caminar, correr o saludar.</li>
+          <li><strong>Rotación automática</strong> y <strong>Capa externa</strong> se activan o desactivan con sus interruptores.</li>
+          <li>El botón de cámara descarga una <strong>captura PNG</strong> de la vista previa.</li>
+        </ul>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="archivos">
+        <h2>9. Abrir y descargar</h2>
+        <h3>Formas de abrir una skin</h3>
+        <ul>
+          <li>Botón <strong>Abrir</strong> o <kbd>Ctrl</kbd>+<kbd>O</kbd>.</li>
+          <li><strong>Arrastrar y soltar</strong> un PNG en cualquier parte de la ventana.</li>
+          <li><strong>Pegar</strong> una imagen copiada con <kbd>Ctrl</kbd>+<kbd>V</kbd>.</li>
+        </ul>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Imagen de entrada</th><th>Qué hace el editor</th></tr></thead>
+            <tbody>
+              <tr><td>64×64</td><td>La abre tal cual y detecta si el modelo es delgado.</td></tr>
+              <tr><td>64×32 (formato antiguo)</td><td>La convierte a 64×64 copiando en espejo el brazo y la pierna derechos hacia los izquierdos, igual que el juego.</td></tr>
+              <tr><td>128×128, 256×256… (HD)</td><td>La reduce a 64×64 tomando un píxel de cada bloque.</td></tr>
+              <tr><td>Otros tamaños</td><td>Muestra un error: una skin debe medir 64×64 o 64×32.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Descargar</h3>
+        <p><strong>Descargar</strong> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) genera un PNG RGBA de 8 bits por canal y 64×64 píxeles con el nombre que escribas. El editor incluye su propio codificador y decodificador PNG (basados en <code>CompressionStream</code> y <code>DecompressionStream</code>), así que los colores y la semitransparencia se guardan y se leen <em>exactamente</em>, sin la pérdida de precisión que produce un <code>&lt;canvas&gt;</code>.</p>
+        <h3>Guardado automático</h3>
+        <p>Cada cambio se guarda en el almacenamiento local del navegador. Si cierras la pestaña, al volver se recupera tu último trabajo. Este respaldo es solo de ese navegador y puede borrarse al limpiar los datos del sitio: descarga el PNG para conservarlo.</p>
+        <h3>Historial</h3>
+        <p>Guarda hasta 100 pasos. Deshacer: <kbd>Ctrl</kbd>+<kbd>Z</kbd>. Rehacer: <kbd>Ctrl</kbd>+<kbd>Y</kbd> o <kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>Z</kbd>. Abrir un archivo, crear una skin nueva o cambiar de modelo también se puede deshacer.</p>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="formato">
+        <h2>10. Formato de skin de Minecraft</h2>
+        <p>Una skin es una imagen <strong>PNG de 64×64 píxeles</strong> que se "envuelve" alrededor de 6 cajas (cabeza, torso, dos brazos y dos piernas), cada una con capa base y capa externa. Cada caja ocupa en la imagen una cruz desplegada con sus 6 caras.</p>
+
+        <div class="uv-map" id="uv-map">
+          <div class="uv-map__controls" role="group" aria-label="Modelo del diagrama">
+            <strong>Mapa UV interactivo:</strong>
+            <button type="button" class="doc-btn" data-model="classic">Clásico (4 px)</button>
+            <button type="button" class="doc-btn" data-model="slim">Delgado (3 px)</button>
+          </div>
+          <div class="uv-map__figure">
+            <svg viewBox="0 0 64 64" role="img" aria-label="Mapa de la textura de 64×64 con la posición de cada parte y cara"></svg>
+            <ul class="uv-map__legend"></ul>
+          </div>
+          <p class="uv-map__caption" aria-live="polite"></p>
+        </div>
+
+        <h3>Cómo se despliega cada caja</h3>
+        <p>Para una caja de ancho <em>w</em>, alto <em>h</em> y profundidad <em>d</em> cuyo origen en la textura es (<em>u</em>, <em>v</em>):</p>
+        <pre><code>          u    u+d        u+d+w      u+2d+w     u+2d+2w
+     v    ┌────┬──────────┬──────────┐
+          │    │  arriba  │  abajo   │
+   v+d    ├────┼──────────┼──────────┼──────────┐
+          │der.│  frente  │   izq.   │  atrás   │
+ v+d+h    └────┴──────────┴──────────┴──────────┘</code></pre>
+        <p>"Derecha" e "izquierda" son del <strong>personaje</strong>: al mirarlo de frente, su lado derecho queda a tu izquierda.</p>
+
+        <h3>Coordenadas de cada parte</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Parte</th><th>Tamaño (w×h×d)</th><th>Origen capa base</th><th>Origen capa externa</th></tr></thead>
+            <tbody>
+              <tr><td>Cabeza / Sombrero</td><td>8×8×8</td><td><code>(0, 0)</code></td><td><code>(32, 0)</code></td></tr>
+              <tr><td>Torso / Chaqueta</td><td>8×12×4</td><td><code>(16, 16)</code></td><td><code>(16, 32)</code></td></tr>
+              <tr><td>Brazo derecho / Manga</td><td>4×12×4 (delgado: 3×12×4)</td><td><code>(40, 16)</code></td><td><code>(40, 32)</code></td></tr>
+              <tr><td>Brazo izquierdo / Manga</td><td>4×12×4 (delgado: 3×12×4)</td><td><code>(32, 48)</code></td><td><code>(48, 48)</code></td></tr>
+              <tr><td>Pierna derecha / Pantalón</td><td>4×12×4</td><td><code>(0, 16)</code></td><td><code>(0, 32)</code></td></tr>
+              <tr><td>Pierna izquierda / Pantalón</td><td>4×12×4</td><td><code>(16, 48)</code></td><td><code>(0, 48)</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Reglas de transparencia</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>Java Edition</th><th>Bedrock Edition</th></tr></thead>
+            <tbody>
+              <tr><td>Capa base</td><td>Siempre opaca: los píxeles transparentes se ven sólidos (normalmente negros).</td><td>Debe ser opaca para verse correctamente.</td></tr>
+              <tr><td>Capa externa</td><td>Admite transparencia total, parcial y opacidad completa.</td><td>Los píxeles con opacidad de 25/255 o menos son invisibles; los demás se ven.</td></tr>
+              <tr><td>Tamaños</td><td>64×64 (y 64×32 antiguo)</td><td>64×64 y 128×128</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>La capa externa es 0,5 px más grande que la base en torso, brazos y piernas, y 1 px más grande en la cabeza.</p>
+
+        <h3>Formato antiguo (64×32)</h3>
+        <p>Antes de Java 1.8 las skins medían 64×32: no tenían capa externa en el cuerpo y las extremidades izquierdas reutilizaban las derechas reflejadas. Al abrirlas, el editor copia en espejo cada cara del brazo y la pierna derechos hacia su lugar en la mitad inferior, y aplica el ajuste histórico de transparencia del sombrero (si esa zona es totalmente opaca, se vuelve transparente).</p>
+
+        <h3>Detección del modelo delgado</h3>
+        <p>En el modelo delgado quedan cuatro zonas sin uso junto a los brazos (<code>50,16</code> 2×4, <code>54,20</code> 2×12, <code>42,48</code> 2×4 y <code>46,52</code> 2×12). Si alguno de esos píxeles es transparente, la skin se considera delgada.</p>
+
+        <h3>Verificar compatibilidad</h3>
+        <p>El botón con el escudo revisa tu skin y avisa si hay píxeles transparentes en la capa base, píxeles semitransparentes o casi invisibles en la capa externa, o píxeles pintados fuera del mapa UV (el juego los ignora).</p>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="juego">
+        <h2>11. Usar tu skin en el juego</h2>
+        <h3>Java Edition</h3>
+        <ol>
+          <li>Abre el Minecraft Launcher y elige <strong>Minecraft: Java Edition</strong>.</li>
+          <li>Entra a la pestaña <strong>Skins</strong> y pulsa <strong>Nueva skin</strong>.</li>
+          <li>Ponle un nombre, elige el modelo (<strong>Clásico</strong> o <strong>Delgado</strong>) y sube el PNG.</li>
+          <li>Pulsa <strong>Guardar y usar</strong>.</li>
+        </ol>
+        <h3>Bedrock Edition</h3>
+        <ol>
+          <li>En el menú principal, abre el <strong>Vestidor</strong>.</li>
+          <li>Ve a la pestaña de <strong>skins clásicas</strong>.</li>
+          <li>Selecciona <strong>Elegir nueva skin</strong> y busca tu PNG.</li>
+          <li>Elige el tipo de brazos cuando el juego lo pregunte.</li>
+        </ol>
+        <p class="callout">Los nombres de los menús pueden cambiar entre versiones del juego o del launcher.</p>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="claude">
+        <h2>12. Conectar con Claude (MCP)</h2>
+        <p>El editor puede conectarse con <strong>Claude</strong> para que cree o edite tu skin en vivo: tú le pides “hazme un caballero con armadura azul” y ves cómo pinta, cara por cara, en la vista 3D. Cada cambio de Claude entra al historial, así que puedes deshacerlo con <kbd>Ctrl</kbd>+<kbd>Z</kbd>.</p>
+
+        <h3>Preparar Claude (una sola vez)</h3>
+        <ol>
+          <li>Pulsa el botón <strong>Claude</strong> del encabezado y copia la <strong>URL del conector</strong> (termina en <code>/mcp</code>).</li>
+          <li>En claude.ai o Claude Desktop: <strong>Configuración → Conectores → Agregar conector personalizado</strong> y pega la URL. En Claude Code: <code>claude mcp add --transport http skins &lt;URL&gt;</code>.</li>
+        </ol>
+
+        <h3>Usarlo</h3>
+        <ol>
+          <li>En el diálogo <strong>Conectar con Claude</strong>, pulsa <strong>Conectar</strong>. Aparece un código como <code>K7QM-X2PD-9RTA</code>.</li>
+          <li>Copia el mensaje sugerido (o solo el código) y pégalo en Claude junto con lo que quieres.</li>
+          <li>Mientras Claude trabaja, la barra de estado muestra su última acción y el diálogo guarda un registro de actividad.</li>
+          <li>Pulsa <strong>Desconectar</strong> cuando termines. Si no hay órdenes en 30 minutos, el editor se desconecta solo.</li>
+        </ol>
+        <p class="callout">Los nombres de los menús de Claude pueden cambiar entre versiones. La conexión funciona en la versión publicada del editor (GitHub Pages) y en <code>localhost</code>.</p>
+
+        <h3>Qué puede hacer Claude</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Herramienta</th><th>Qué hace</th></tr></thead>
+            <tbody>
+              <tr><td><code>get_uv_layout</code></td><td>Consulta el mapa de la textura: dónde está cada parte, capa y cara.</td></tr>
+              <tr><td><code>color_harmony</code> · <code>tonal_scale</code></td><td>Calcula armonías y rampas de sombreado con el mismo motor de color del editor.</td></tr>
+              <tr><td><code>get_editor_state</code> · <code>get_skin_image</code></td><td>Revisa el modelo, los colores y una imagen 3D (frente, espalda o lados) o de la textura para evaluar su trabajo.</td></tr>
+              <tr><td><code>fill_face</code> · <code>draw_face_pattern</code> · <code>paint_pixels</code></td><td>Pinta caras completas, dibujos tipo arte ASCII y píxeles sueltos.</td></tr>
+              <tr><td><code>add_noise</code> · <code>mirror_side</code> · <code>clear_layer</code></td><td>Textura, simetría y limpieza.</td></tr>
+              <tr><td><code>new_skin</code> · <code>set_model</code> · <code>undo</code> · <code>redo</code> · <code>download_skin</code></td><td>Empezar, cambiar el modelo, historial y descarga.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Cómo funciona y privacidad</h3>
+        <p>El servidor MCP (desplegado en Vercel) no pinta nada: guarda por unos segundos las órdenes de Claude en una cola; el editor las consulta, las ejecuta con su propio motor y devuelve el resultado. El <strong>código</strong> identifica tu sesión y el <strong>token</strong> secreto nunca sale de tu navegador. El servidor no guarda tus skins. En <strong>Opciones avanzadas</strong> puedes apuntar a otro servidor (por ejemplo, uno propio o local con <code>?bridge=http://localhost:3000</code>).</p>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="atajos">
+        <h2>13. Atajos de teclado</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Atajo</th><th>Acción</th></tr></thead>
+            <tbody>
+              <tr><td><kbd>P</kbd> <kbd>E</kbd> <kbd>F</kbd> <kbd>I</kbd> <kbd>L</kbd> <kbd>D</kbd> <kbd>N</kbd> <kbd>R</kbd></td><td>Lápiz, Borrador, Cubeta, Cuentagotas, Aclarar, Oscurecer, Ruido, Reemplazar</td></tr>
+              <tr><td><kbd>[</kbd> / <kbd>]</kbd></td><td>Reducir / aumentar el tamaño del pincel</td></tr>
+              <tr><td><kbd>Alt</kbd>+clic</td><td>Cuentagotas temporal</td></tr>
+              <tr><td><kbd>Mayús</kbd>+clic</td><td>Línea recta (lápiz y pinceles) · cara completa (cubeta)</td></tr>
+              <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td><td>Deshacer</td></tr>
+              <tr><td><kbd>Ctrl</kbd>+<kbd>Y</kbd> · <kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>Z</kbd></td><td>Rehacer</td></tr>
+              <tr><td><kbd>X</kbd></td><td>Intercambiar color principal y secundario</td></tr>
+              <tr><td><kbd>M</kbd></td><td>Modo espejo</td></tr>
+              <tr><td><kbd>C</kbd></td><td>Alternar capa a editar (base / externa)</td></tr>
+              <tr><td><kbd>G</kbd></td><td>Cuadrícula</td></tr>
+              <tr><td><kbd>O</kbd></td><td>Mostrar / ocultar capa externa</td></tr>
+              <tr><td><kbd>V</kbd></td><td>Alternar vista 3D / 2D</td></tr>
+              <tr><td><kbd>+</kbd> / <kbd>-</kbd></td><td>Acercar / alejar</td></tr>
+              <tr><td><kbd>0</kbd> · <kbd>1</kbd>–<kbd>6</kbd></td><td>Reiniciar cámara · vistas frente, atrás, derecha, izquierda, arriba, abajo</td></tr>
+              <tr><td>Flechas</td><td>Girar la cámara 3D · con el círculo cromático enfocado: tono y saturación · con el borde del panel enfocado: ancho</td></tr>
+              <tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd> · <kbd>Ctrl</kbd>+<kbd>S</kbd> · <kbd>Ctrl</kbd>+<kbd>V</kbd></td><td>Abrir · descargar · pegar skin</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>En macOS puedes usar <kbd>Cmd</kbd> en lugar de <kbd>Ctrl</kbd>. Los atajos se desactivan mientras escribes en un campo de texto.</p>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="arquitectura">
+        <h2>14. Arquitectura del código</h2>
+        <p>El proyecto no tiene dependencias ni paso de compilación. Está organizado por responsabilidades:</p>
+        <pre><code>editor-skins-minecraft/
+├── index.html              Estructura de la interfaz (textos vía data-i18n)
+├── README.md
+├── css/
+│   ├── tokens.css          Variables de diseño y temas claro/oscuro
+│   ├── base.css            Reinicio y estilos globales
+│   ├── layout.css          Cuadrícula principal y diseño responsivo
+│   └── components.css      Botones, paneles, diálogos, selector de color…
+├── js/
+│   ├── main.js             Punto de entrada: crea y conecta los módulos
+│   ├── config.js           Constantes (tamaños, límites, claves de almacenamiento)
+│   ├── core/               Lógica sin interfaz
+│   │   ├── skin-model.js   Mapa UV, geometría 3D, espejo, detección de modelo
+│   │   ├── skin-document.js Píxeles + historial + eventos
+│   │   ├── history.js      Deshacer / rehacer
+│   │   ├── skin-io.js      Leer, convertir, validar y exportar PNG
+│   │   ├── png-decoder.js  Decodificador PNG exacto
+│   │   ├── transforms.js   Limpiar capas, reflejar lados, adaptar brazos
+│   │   ├── color-theory.js Armonías, escala tonal, paleta aleatoria, agrupar colores
+│   │   └── templates.js    Skins iniciales generadas por código
+│   ├── render/             WebGL2 sin librerías
+│   │   ├── math.js         Matrices y vectores
+│   │   ├── camera.js       Cámara orbital (girar, desplazar, zoom)
+│   │   ├── renderer.js     Shaders, texturas y dibujo del personaje
+│   │   └── picking.js      Rayo → píxel bajo el cursor
+│   ├── editor/             Interacción de edición
+│   │   ├── editor-state.js Herramienta, colores, capa, visibilidad…
+│   │   ├── tools.js        Catálogo de herramientas y controlador de trazos
+│   │   ├── viewport-3d.js  Vista 3D editable
+│   │   ├── viewport-2d.js  Vista 2D editable
+│   │   ├── preview.js      Vista previa animada
+│   │   └── shortcuts.js    Atajos de teclado
+│   ├── ui/                 Componentes de interfaz
+│   │   ├── toolbar.js · color-panel.js · harmony-panel.js · layers-panel.js
+│   │   ├── palette-export.js  PNG, .gpl y JSON de paletas
+│   │   ├── sidebar-resizer.js Borde arrastrable del panel lateral
+│   │   ├── claude-panel.js    Diálogo "Conectar con Claude" y registro de actividad
+│   │   ├── menu.js · dialogs.js · toast.js · theme.js · icons.js
+│   ├── remote/             Conexión con Claude (MCP)
+│   │   ├── claude-bridge.js Sesión y consulta de órdenes al servidor
+│   │   └── commands.js     Órdenes que Claude puede ejecutar en el editor
+│   ├── i18n/
+│   │   ├── i18n.js         Función t() y traducción del HTML
+│   │   └── es-419.js       Textos en español latinoamericano
+│   └── utils/              emitter, color (HEX/RGB/HSL/OKLCH), clipboard, storage, keyboard, gestures
+├── docs/                   Esta documentación
+└── tests/                  Pruebas del núcleo en el navegador</code></pre>
+
+        <h3>Flujo de datos</h3>
+        <div class="flow">
+          <div class="flow__box"><strong>Vista 3D / 2D</strong>Traduce el puntero en un píxel (x, y) de la textura.</div>
+          <div class="flow__box"><strong>ToolController</strong>Aplica la herramienta (pincel, espejo, relleno…) sobre esos píxeles.</div>
+          <div class="flow__box"><strong>SkinDocument</strong>Guarda los píxeles, registra el historial y emite <code>change</code>.</div>
+        </div>
+        <p>Cuando <code>SkinDocument</code> emite <code>change</code>, <code>main.js</code> avisa a las vistas (suben la textura a la GPU), a la paleta de colores de la skin y al autoguardado. Del mismo modo, <code>EditorState</code> emite <code>change</code> cuando cambia la herramienta, un color o la visibilidad. Ningún componente de interfaz modifica los píxeles directamente, lo que mantiene todo sincronizado y el historial siempre correcto.</p>
+
+        <h3>Decisiones técnicas</h3>
+        <ul>
+          <li><strong>WebGL2 escrito a mano</strong>: el modelo son 12 cajas, así que un renderizador propio (unas 300 líneas) es más ligero que cualquier librería. El shader dibuja la cuadrícula y el resaltado del píxel usando derivadas (<code>fwidth</code>).</li>
+          <li><strong>Selección en la CPU</strong>: la intersección rayo–caja ("slab") identifica la cara y el píxel exactos sin leer la GPU.</li>
+          <li><strong>Un solo mapa UV</strong>: <code>skin-model.js</code> describe cada cara con su origen y ejes 3D. De ahí salen los vértices, el picking, las guías 2D, el espejo y el diagrama de esta página.</li>
+          <li><strong>Espejo geométrico</strong>: el píxel simétrico se calcula reflejando el centro 3D del píxel en X = 0. El resultado coincide exactamente con la conversión de skins 64×32 que hace el juego (se verifica en las pruebas).</li>
+          <li><strong>Historial por instantáneas</strong>: una skin ocupa 16 KB, así que guardar copias completas es simple y fiable.</li>
+          <li><strong>Accesibilidad</strong>: controles nativos, <code>&lt;dialog&gt;</code>, roles ARIA, foco visible, textos para lectores de pantalla y respeto de <code>prefers-reduced-motion</code>.</li>
+        </ul>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="desarrollo">
+        <h2>15. Guía para desarrolladores</h2>
+        <h3>Agregar una herramienta</h3>
+        <ol>
+          <li>En <code>js/editor/tools.js</code>, añade una entrada a <code>TOOLS</code>:
+            <pre><code>{ id: 'saturate', icon: 'lighten', key: 's', kind: 'brush', once: true }</code></pre></li>
+          <li>Si es un pincel, define su transformación en <code>BRUSH_OPS</code>. Recibe el color actual y el estado, y devuelve el nuevo color:
+            <pre><code>saturate: (c, s) =&gt; aumentarSaturacion(c, s.intensity),</code></pre></li>
+          <li>Si es de un solo clic (<code>kind: 'click'</code>), implementa su acción en <code>ToolController._click()</code>.</li>
+          <li>Agrega los textos en <code>js/i18n/es-419.js</code>: <code>tools.saturate</code> y <code>tools.hints.saturate</code>, y el atajo en <code>help.items</code>.</li>
+        </ol>
+        <p>El botón aparece solo en la barra de herramientas y el atajo se registra automáticamente.</p>
+
+        <h3>Agregar un idioma</h3>
+        <ol>
+          <li>Copia <code>js/i18n/es-419.js</code> como, por ejemplo, <code>pt-BR.js</code> y traduce los valores.</li>
+          <li>Regístralo en <code>LOCALES</code> dentro de <code>js/i18n/i18n.js</code> y llama a <code>setLocale('pt-BR')</code>.</li>
+        </ol>
+
+        <h3>Agregar una animación a la vista previa</h3>
+        <p>En <code>js/editor/preview.js</code>, añade un caso a <code>computePose()</code> que devuelva una matriz de rotación por parte (alrededor de su pivote) y agrega la opción en el <code>&lt;select id="opt-animation"&gt;</code> y en <code>preview.anim</code> de i18n.</p>
+
+        <h3>Convenciones</h3>
+        <ul>
+          <li>Módulos ES nativos, un archivo por responsabilidad y comentarios JSDoc en español.</li>
+          <li>Constantes en <code>config.js</code>; textos visibles solo en <code>i18n/</code>.</li>
+          <li>CSS con variables de <code>tokens.css</code> y nombres estilo BEM (<code>.panel__header</code>, <code>.btn--primary</code>).</li>
+          <li>Todo acceso a <code>localStorage</code> pasa por <code>utils/storage.js</code>, que nunca lanza errores.</li>
+        </ul>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="compatibilidad">
+        <h2>16. Navegadores compatibles</h2>
+        <p>Versiones recomendadas: <strong>Chrome / Edge 111+</strong>, <strong>Firefox 121+</strong> y <strong>Safari 16.4+</strong> (escritorio y móvil). Las características que usa el editor son:</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Característica</th><th>Para qué se usa</th><th>Si no está disponible</th></tr></thead>
+            <tbody>
+              <tr><td>WebGL2</td><td>Vista 3D y vista previa</td><td>El editor 2D sigue funcionando</td></tr>
+              <tr><td><code>CompressionStream</code></td><td>Codificar el PNG exacto</td><td>Se usa <code>canvas.toBlob()</code></td></tr>
+              <tr><td><code>DecompressionStream</code></td><td>Leer el PNG exacto</td><td>Se usa <code>createImageBitmap</code> + canvas</td></tr>
+              <tr><td>Módulos ES, <code>&lt;dialog&gt;</code>, Pointer Events</td><td>Estructura, ventanas y entrada unificada (mouse, lápiz, táctil)</td><td>Necesarios</td></tr>
+              <tr><td><code>EyeDropper</code></td><td>Tomar colores de la pantalla</td><td>El botón se oculta (Firefox y Safari)</td></tr>
+              <tr><td><code>color-mix()</code>, <code>:has()</code></td><td>Detalles visuales</td><td>Se degradan sin afectar el uso</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="faq">
+        <h2>17. Preguntas frecuentes</h2>
+        <h3>Abrí index.html con doble clic y la página está vacía.</h3>
+        <p>Los módulos de JavaScript no se cargan desde <code>file://</code>. Usa un servidor local como se explica en <a href="#inicio">Inicio rápido</a>.</p>
+        <h3>Mi skin se ve con partes negras en el juego.</h3>
+        <p>Probablemente hay píxeles transparentes en la <strong>capa base</strong>. Usa <strong>Verificar compatibilidad</strong> para encontrarlos y rellénalos con color.</p>
+        <h3>Los brazos se ven cortados o con una franja extraña.</h3>
+        <p>El modelo elegido en el juego no coincide con el de la skin. Súbela con el modelo correcto (Clásico o Delgado).</p>
+        <h3>Pinto en 3D pero no pasa nada.</h3>
+        <p>Revisa que la <strong>capa activa</strong> sea la que quieres y que la parte esté visible en el panel <em>Capas y partes</em>. En 3D solo se pinta sobre la capa activa.</p>
+        <h3>¿Se sube mi skin a algún servidor?</h3>
+        <p>No. Todo ocurre en tu navegador; el editor no hace ninguna petición de red.</p>
+        <h3>Perdí mi trabajo al borrar los datos del navegador.</h3>
+        <p>El guardado automático vive en el almacenamiento local. Descarga el PNG con frecuencia para tener una copia segura.</p>
+      </section>
+
+      <!-- ================================================================ -->
+      <section class="doc-section" id="referencias">
+        <h2>18. Referencias</h2>
+        <ul>
+          <li><a href="https://minecraft.wiki/w/Skin" target="_blank" rel="noopener">Minecraft Wiki — Skin</a>: dimensiones, capas, modelos y reglas de transparencia.</li>
+          <li><a href="https://github.com/bs-community/skinview-utils" target="_blank" rel="noopener">skinview-utils</a>: referencia de la conversión 64×32 → 64×64 y de la detección del modelo delgado.</li>
+          <li><a href="https://bottosson.github.io/posts/oklab/" target="_blank" rel="noopener">Björn Ottosson — OKLab</a>: espacio de color perceptual usado en la escala tonal, OKLCH y la agrupación de colores.</li>
+          <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/EyeDropper_API" target="_blank" rel="noopener">MDN — EyeDropper API</a>: cuentagotas de pantalla.</li>
+          <li><a href="https://www.w3.org/TR/png-3/" target="_blank" rel="noopener">W3C — Especificación PNG</a>: bloques, filtros y compresión usados por el codificador y el decodificador.</li>
+          <li><a href="https://developer.mozilla.org/es/docs/Web/API/WebGL_API" target="_blank" rel="noopener">MDN — WebGL</a> y <a href="https://developer.mozilla.org/en-US/docs/Web/API/Compression_Streams_API" target="_blank" rel="noopener">MDN — Compression Streams API</a>.</li>
+        </ul>
+        <p class="doc-footer">Proyecto independiente y sin afiliación con Mojang Studios ni Microsoft. "Minecraft" es una marca de sus respectivos dueños.</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

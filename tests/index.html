@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es-419">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pruebas · Editor de Skins</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <style>
+    body { margin: 0; padding: 32px; background: var(--bg); color: var(--text); font-family: var(--font); }
+    h1 { margin: 0 0 8px; font-size: 1.4rem; }
+    #summary { margin: 0 0 20px; font-weight: 700; }
+    .ok { color: var(--success); }
+    .fail { color: var(--danger); }
+    ul { padding: 0; list-style: none; }
+    li { padding: 8px 12px; margin-bottom: 6px; border-radius: 6px; background: var(--surface); border: 1px solid var(--border); }
+  </style>
+  <script type="module" src="tests.js"></script>
+</head>
+<body>
+  <h1>Pruebas del núcleo</h1>
+  <p id="summary">Ejecutando…</p>
+  <ul id="results"></ul>
+</body>
+</html>
