@@ -37,7 +37,7 @@
         <li><a href="#archivos">Abrir y descargar</a></li>
         <li><a href="#formato">Formato de skin</a></li>
         <li><a href="#juego">Usar tu skin en el juego</a></li>
-        <li><a href="#claude">Conectar con Claude (MCP)</a></li>
+        <li><a href="#agente">Conectar con un agente de IA (MCP)</a></li>
         <li><a href="#atajos">Atajos de teclado</a></li>
         <li><a href="#arquitectura">Arquitectura del código</a></li>
         <li><a href="#desarrollo">Guía para desarrolladores</a></li>
@@ -79,7 +79,7 @@
         <h2>2. Inicio rápido</h2>
         <p>El editor usa <strong>módulos de JavaScript</strong> (<code>&lt;script type="module"&gt;</code>). Por seguridad, los navegadores no cargan módulos si abres el archivo con doble clic (<code>file://</code>), así que necesitas un servidor local. Cualquiera de estas opciones funciona:</p>
         <pre><code># Opción 1: Python (viene instalado en macOS y la mayoría de Linux)
-cd editor-skins-minecraft
+cd minecraft-skins-editor
 python3 -m http.server 8080
 
 # Opción 2: Node.js
@@ -409,26 +409,37 @@ npx serve .
       </section>
 
       <!-- ================================================================ -->
-      <section class="doc-section" id="claude">
-        <h2>12. Conectar con Claude (MCP)</h2>
-        <p>El editor puede conectarse con <strong>Claude</strong> para que cree o edite tu skin en vivo: tú le pides “hazme un caballero con armadura azul” y ves cómo pinta, cara por cara, en la vista 3D. Cada cambio de Claude entra al historial, así que puedes deshacerlo con <kbd>Ctrl</kbd>+<kbd>Z</kbd>.</p>
+      <section class="doc-section" id="agente">
+        <h2>12. Conectar con un agente de IA (MCP)</h2>
+        <p>El editor puede conectarse con un <strong>agente de IA</strong> para que cree o edite tu skin en vivo: le pides “hazme un caballero con armadura azul” y ves cómo pinta, cara por cara, en la vista 3D. Funciona con cualquier agente compatible con <strong>MCP</strong> (Model Context Protocol) que admita servidores por HTTP, por ejemplo Claude, ChatGPT, GitHub Copilot en VS Code, Cursor o Gemini CLI. Cada cambio del agente entra al historial, así que puedes deshacerlo con <kbd>Ctrl</kbd>+<kbd>Z</kbd>.</p>
 
-        <h3>Preparar Claude (una sola vez)</h3>
-        <ol>
-          <li>Pulsa el botón <strong>Claude</strong> del encabezado y copia la <strong>URL del conector</strong> (termina en <code>/mcp</code>).</li>
-          <li>En claude.ai o Claude Desktop: <strong>Configuración → Conectores → Agregar conector personalizado</strong> y pega la URL. En Claude Code: <code>claude mcp add --transport http skins &lt;URL&gt;</code>.</li>
-        </ol>
+        <h3>Preparar tu agente (una sola vez)</h3>
+        <p>Pulsa el botón <strong>Agente IA</strong> del encabezado y copia la <strong>URL del servidor MCP</strong> (termina en <code>/mcp</code>; la oficial es <code>https://editor-skins-mcp.vercel.app/mcp</code>). Luego agrégala a tu agente. No hace falta clave ni inicio de sesión.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Agente</th><th>Cómo agregar el servidor</th></tr></thead>
+            <tbody>
+              <tr><td>Claude (web y escritorio)</td><td><strong>Configuración → Conectores → Agregar conector personalizado</strong> y pega la URL.</td></tr>
+              <tr><td>Claude Code</td><td><code>claude mcp add --transport http skins &lt;URL&gt;</code></td></tr>
+              <tr><td>ChatGPT</td><td>Con el <strong>modo desarrollador</strong> activo: <strong>Configuración → Conectores → Crear</strong> y pega la URL.</td></tr>
+              <tr><td>VS Code (Copilot, modo agente)</td><td>En <code>.vscode/mcp.json</code>: <code>{ "servers": { "skins": { "type": "http", "url": "&lt;URL&gt;" } } }</code></td></tr>
+              <tr><td>Cursor</td><td>En <code>~/.cursor/mcp.json</code>: <code>{ "mcpServers": { "skins": { "url": "&lt;URL&gt;" } } }</code></td></tr>
+              <tr><td>Gemini CLI</td><td>En <code>~/.gemini/settings.json</code>: <code>{ "mcpServers": { "skins": { "httpUrl": "&lt;URL&gt;" } } }</code></td></tr>
+              <tr><td>Otros</td><td>Busca "conectores" o "servidores MCP" en su configuración y elige el tipo HTTP ("streamable HTTP").</td></tr>
+            </tbody>
+          </table>
+        </div>
 
         <h3>Usarlo</h3>
         <ol>
-          <li>En el diálogo <strong>Conectar con Claude</strong>, pulsa <strong>Conectar</strong>. Aparece un código como <code>K7QM-X2PD-9RTA</code>.</li>
-          <li>Copia el mensaje sugerido (o solo el código) y pégalo en Claude junto con lo que quieres.</li>
-          <li>Mientras Claude trabaja, la barra de estado muestra su última acción y el diálogo guarda un registro de actividad.</li>
+          <li>En el diálogo <strong>Conectar con un agente de IA</strong>, pulsa <strong>Conectar</strong>. Aparece un código como <code>K7QM-X2PD-9RTA</code>.</li>
+          <li>Copia el mensaje sugerido (o solo el código) y pégalo en tu agente junto con lo que quieres.</li>
+          <li>Mientras el agente trabaja, la barra de estado muestra su última acción ("IA: …") y el diálogo guarda un registro de actividad.</li>
           <li>Pulsa <strong>Desconectar</strong> cuando termines. Si no hay órdenes en 30 minutos, el editor se desconecta solo.</li>
         </ol>
-        <p class="callout">Los nombres de los menús de Claude pueden cambiar entre versiones. La conexión funciona en la versión publicada del editor (GitHub Pages) y en <code>localhost</code>.</p>
+        <p class="callout">Los menús de cada agente pueden cambiar entre versiones. La conexión funciona en la versión publicada del editor (GitHub Pages) y en <code>localhost</code>.</p>
 
-        <h3>Qué puede hacer Claude</h3>
+        <h3>Qué puede hacer el agente</h3>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Herramienta</th><th>Qué hace</th></tr></thead>
@@ -444,7 +455,7 @@ npx serve .
         </div>
 
         <h3>Cómo funciona y privacidad</h3>
-        <p>El servidor MCP (desplegado en Vercel) no pinta nada: guarda por unos segundos las órdenes de Claude en una cola; el editor las consulta, las ejecuta con su propio motor y devuelve el resultado. El <strong>código</strong> identifica tu sesión y el <strong>token</strong> secreto nunca sale de tu navegador. El servidor no guarda tus skins. En <strong>Opciones avanzadas</strong> puedes apuntar a otro servidor (por ejemplo, uno propio o local con <code>?bridge=http://localhost:3000</code>).</p>
+        <p>El servidor MCP (desplegado en Vercel) no pinta nada: guarda por unos segundos las órdenes del agente en una cola; el editor las consulta, las ejecuta con su propio motor y devuelve el resultado. El <strong>código</strong> identifica tu sesión y el <strong>token</strong> secreto nunca sale de tu navegador. El servidor no guarda tus skins. En <strong>Opciones avanzadas</strong> puedes apuntar a otro servidor (por ejemplo, uno propio o local con <code>?bridge=http://localhost:3000</code>).</p>
       </section>
 
       <!-- ================================================================ -->
@@ -480,7 +491,7 @@ npx serve .
       <section class="doc-section" id="arquitectura">
         <h2>14. Arquitectura del código</h2>
         <p>El proyecto no tiene dependencias ni paso de compilación. Está organizado por responsabilidades:</p>
-        <pre><code>editor-skins-minecraft/
+        <pre><code>minecraft-skins-editor/
 ├── index.html              Estructura de la interfaz (textos vía data-i18n)
 ├── README.md
 ├── css/
@@ -516,11 +527,11 @@ npx serve .
 │   │   ├── toolbar.js · color-panel.js · harmony-panel.js · layers-panel.js
 │   │   ├── palette-export.js  PNG, .gpl y JSON de paletas
 │   │   ├── sidebar-resizer.js Borde arrastrable del panel lateral
-│   │   ├── claude-panel.js    Diálogo "Conectar con Claude" y registro de actividad
+│   │   ├── agent-panel.js     Diálogo "Conectar con un agente de IA" y registro de actividad
 │   │   ├── menu.js · dialogs.js · toast.js · theme.js · icons.js
-│   ├── remote/             Conexión con Claude (MCP)
-│   │   ├── claude-bridge.js Sesión y consulta de órdenes al servidor
-│   │   └── commands.js     Órdenes que Claude puede ejecutar en el editor
+│   ├── remote/             Conexión con un agente de IA (MCP)
+│   │   ├── agent-bridge.js Sesión y consulta de órdenes al servidor
+│   │   └── commands.js     Órdenes que el agente puede ejecutar en el editor
 │   ├── i18n/
 │   │   ├── i18n.js         Función t() y traducción del HTML
 │   │   └── es-419.js       Textos en español latinoamericano
@@ -610,7 +621,7 @@ npx serve .
         <h3>Pinto en 3D pero no pasa nada.</h3>
         <p>Revisa que la <strong>capa activa</strong> sea la que quieres y que la parte esté visible en el panel <em>Capas y partes</em>. En 3D solo se pinta sobre la capa activa.</p>
         <h3>¿Se sube mi skin a algún servidor?</h3>
-        <p>No. Todo ocurre en tu navegador; el editor no hace ninguna petición de red.</p>
+        <p>No. Todo ocurre en tu navegador. El editor solo se comunica con un servidor si conectas un agente de IA, y aun así el servidor solo retransmite órdenes por unos segundos: nunca guarda tus skins.</p>
         <h3>Perdí mi trabajo al borrar los datos del navegador.</h3>
         <p>El guardado automático vive en el almacenamiento local. Descarga el PNG con frecuencia para tener una copia segura.</p>
       </section>

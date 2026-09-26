@@ -23,7 +23,7 @@ Genera archivos **PNG RGBA de 64×64 px**, el formato que aceptan Minecraft: Jav
 - Codificador y decodificador PNG propios (sin pérdida en la semitransparencia).
 - Verificación de compatibilidad con Java y Bedrock antes de descargar.
 - Tema claro y oscuro, guardado automático, historial de 100 pasos e interfaz en español latinoamericano.
-- **Conectar con Claude**: mediante un servidor MCP, Claude puede crear y editar tu skin en vivo (ver abajo).
+- **Agente IA**: mediante un servidor MCP, cualquier agente de IA compatible (Claude, ChatGPT, Copilot, Cursor, Gemini…) puede crear y editar tu skin en vivo (ver abajo).
 
 ## Cómo ejecutarlo
 
@@ -43,13 +43,24 @@ El sitio se publica tal cual desde la rama `main` (carpeta raíz): **Settings �
 
 Dirección: <https://jacksonmultitech.github.io/minecraft-skins-editor/>
 
-## Conectar con Claude (MCP)
+## Conectar con un agente de IA (MCP)
 
-El botón **Claude** del encabezado conecta el editor con el servidor MCP del repositorio [mcp-minecraft-skins-editor](https://github.com/jacksonmultitech/mcp-minecraft-skins-editor), desplegado en Vercel.
+El botón **Agente IA** del encabezado conecta el editor con el servidor MCP del repositorio [mcp-minecraft-skins-editor](https://github.com/jacksonmultitech/mcp-minecraft-skins-editor), desplegado en Vercel. Funciona con cualquier agente que admita servidores MCP por HTTP ("streamable HTTP"), sin clave ni inicio de sesión.
 
-1. Agrega el conector en Claude con la URL que muestra el diálogo (termina en `/mcp`).
-2. Pulsa **Conectar**; aparece un código como `K7QM-X2PD-9RTA`.
-3. Dile a Claude: *“Usa el editor de skins con el código K7QM-X2PD-9RTA y hazme un caballero con armadura azul”*.
+1. Agrega el servidor `https://editor-skins-mcp.vercel.app/mcp` a tu agente (solo la primera vez).
+2. Pulsa **Agente IA → Conectar**; aparece un código como `K7QM-X2PD-9RTA`.
+3. Dile a tu agente: *“Usa el editor de skins con el código K7QM-X2PD-9RTA y hazme un caballero con armadura azul”*.
+
+Cómo agregar el servidor en algunos agentes (los menús pueden cambiar entre versiones):
+
+| Agente | Dónde |
+|---|---|
+| Claude (web / escritorio) | Configuración → Conectores → Agregar conector personalizado → pega la URL. |
+| Claude Code | `claude mcp add --transport http skins https://editor-skins-mcp.vercel.app/mcp` |
+| ChatGPT | Con el modo desarrollador activo: Configuración → Conectores → Crear → pega la URL. |
+| VS Code (Copilot, modo agente) | En `.vscode/mcp.json`: `{ "servers": { "skins": { "type": "http", "url": "https://editor-skins-mcp.vercel.app/mcp" } } }` |
+| Cursor | En `~/.cursor/mcp.json`: `{ "mcpServers": { "skins": { "url": "https://editor-skins-mcp.vercel.app/mcp" } } }` |
+| Gemini CLI | En `~/.gemini/settings.json`: `{ "mcpServers": { "skins": { "httpUrl": "https://editor-skins-mcp.vercel.app/mcp" } } }` |
 
 El servidor solo retransmite órdenes; el editor las ejecuta con su propio motor, todo queda en el historial (`Ctrl`+`Z`) y la sesión se cierra sola tras 30 minutos sin actividad. La URL del servidor está en `js/config.js` (`REMOTE.DEFAULT_BRIDGE_URL`) y se puede cambiar en *Opciones avanzadas* o con `?bridge=https://…` en la dirección.
 
@@ -63,7 +74,7 @@ js/core/          Mapa UV, documento de skin, historial, E/S PNG, transformacion
 js/render/        WebGL2: matemáticas, cámara orbital, renderizador y picking
 js/editor/        Estado, herramientas, vistas 3D/2D, vista previa y atajos
 js/ui/            Barra de herramientas, paneles, diálogos, notificaciones, tema, íconos
-js/remote/        Puente con Claude (sesión, consulta de órdenes y comandos)
+js/remote/        Puente con el agente de IA (sesión, consulta de órdenes y comandos)
 js/i18n/          Textos (es-419)
 js/utils/         Utilidades (eventos, color, almacenamiento, teclado, gestos)
 docs/             Documentación en español
