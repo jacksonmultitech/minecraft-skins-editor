@@ -1,6 +1,6 @@
 /**
  * @file agent-panel.js
- * Interfaz de "Conectar con Claude": botón del encabezado, diálogo con el
+ * Interfaz de "Conectar con un agente de IA": botón del encabezado, diálogo con el
  * código de sesión, registro de actividad e indicador en la barra de estado.
  */
 import { t } from '../i18n/i18n.js';
@@ -75,11 +75,11 @@ export class AgentPanel {
     });
   }
 
-  /** Muestra la última acción de Claude en la barra de estado por unos segundos. */
+  /** Muestra la última acción del agente en la barra de estado por unos segundos. */
   _flashStatusbar(text) {
     clearTimeout(this._flashTimer);
     this.el.statusbar.dataset.activity = 'true';
-    this.el.statusbar.querySelector('span').textContent = `Claude: ${text}`;
+    this.el.statusbar.querySelector('span').textContent = `${t('agent.activityPrefix')}: ${text}`;
     this._flashTimer = setTimeout(() => {
       this.el.statusbar.dataset.activity = 'false';
       this.render();

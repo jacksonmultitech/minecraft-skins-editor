@@ -1,11 +1,11 @@
 /**
  * @file commands.js
- * Órdenes que Claude puede ejecutar en el editor a través del MCP.
+ * Órdenes que un agente de IA puede ejecutar en el editor a través del MCP.
  *
  * Cada orden recibe argumentos ya validados por el servidor, pero aquí se
  * vuelven a validar: el editor nunca confía ciegamente en datos externos.
  * Todas las que modifican la skin se ejecutan como UNA transacción del
- * historial, así el usuario puede deshacer cada acción de Claude con Ctrl+Z.
+ * historial, así el usuario puede deshacer cada acción del agente con Ctrl+Z.
  */
 import { SKIN_WIDTH, MODEL, LAYER } from '../config.js';
 import { getBoxes, getRegionMap, PART_ORDER, FACE_ORDER } from '../core/skin-model.js';
@@ -15,7 +15,7 @@ import { clearLayer, mirrorSide, convertArms } from '../core/transforms.js';
 import { groupSkinColors } from '../core/color-theory.js';
 import { parseColor, shade } from '../utils/color.js';
 
-/** Error de validación con mensaje para Claude (en español). */
+/** Error de validación con mensaje para el agente (en español). */
 class CommandError extends Error {}
 
 const assert = (condition, message) => { if (!condition) throw new CommandError(message); };

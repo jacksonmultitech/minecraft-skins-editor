@@ -144,7 +144,7 @@ export class Preview {
   }
 
   /**
-   * Captura con un encuadre fijo y sin animación (para que Claude revise la skin).
+   * Captura con un encuadre fijo y sin animación (para que el agente revise la skin).
    * @param {'front'|'back'|'left'|'right'} [angle='front'] Vista 3/4 desde ese lado.
    * @returns {Promise<Blob>}
    */

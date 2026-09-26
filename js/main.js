@@ -105,7 +105,7 @@ export class App {
     this.harmonyPanel = new HarmonyPanel($('panel-theory'), { state: this.state, getName: () => this.doc.name });
     this.sidebarResizer = new SidebarResizer($('sidebar-resizer'), document.querySelector('.app'));
 
-    // Conexión con Claude (MCP). Si había una sesión activa, se retoma.
+    // Conexión con un agente de IA (MCP). Si había una sesión activa, se retoma.
     this.agentBridge = new AgentBridge({ handlers: createCommandHandlers(this) });
     this.agentPanel = new AgentPanel(this.agentBridge);
     this.agentBridge.resume();

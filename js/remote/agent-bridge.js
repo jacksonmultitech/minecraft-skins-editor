@@ -1,11 +1,11 @@
 /**
  * @file agent-bridge.js
- * Puente entre el editor y Claude (a través del servidor MCP en Vercel).
+ * Puente entre el editor y un agente de IA (a través del servidor MCP en Vercel).
  *
  *  1. connect(): pide al servidor una sesión → recibe { code, token }.
- *     El usuario le da el CÓDIGO a Claude; el TOKEN nunca sale del navegador.
+ *     El usuario le da el CÓDIGO a su agente; el TOKEN nunca sale del navegador.
  *  2. Bucle de consulta ("polling"): cada pocos cientos de ms pregunta si
- *     Claude envió órdenes, las ejecuta en orden y devuelve los resultados.
+ *     el agente envió órdenes, las ejecuta en orden y devuelve los resultados.
  *     La frecuencia baja sola cuando no hay actividad para ahorrar peticiones.
  *  3. Se desconecta solo tras un rato sin órdenes o si la sesión vence.
  *
@@ -69,7 +69,7 @@ export class AgentBridge extends Emitter {
     }
   }
 
-  /** URL del endpoint MCP (la que se agrega como conector en Claude). */
+  /** URL del endpoint MCP (la que se agrega como conector en el agente). */
   get mcpUrl() {
     return `${this.baseUrl}/mcp`;
   }
@@ -196,7 +196,7 @@ export class AgentBridge extends Emitter {
     }
   }
 
-  /** Ejecuta una orden y arma su resultado (los errores también se informan a Claude). */
+  /** Ejecuta una orden y arma su resultado (los errores también se informan al agente). */
   async _execute({ id, op, args }) {
     const handler = Object.hasOwn(this.handlers, op) ? this.handlers[op] : null;
     if (!handler) return { id, ok: false, error: `Orden desconocida: ${op}` };
