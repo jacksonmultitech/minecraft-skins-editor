@@ -1,0 +1,32 @@
+{
+  "name": "@jacksonmultitech/minecraft-skins-editor",
+  "version": "1.0.0",
+  "description": "Editor de skins de Minecraft en 3D y 2D hecho con HTML, CSS, JavaScript y WebGL2 nativos (PNG 64×64 para Java y Bedrock).",
+  "type": "module",
+  "license": "MIT",
+  "author": "jacksonmultitech",
+  "homepage": "https://jacksonmultitech.github.io/minecraft-skins-editor/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jacksonmultitech/minecraft-skins-editor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jacksonmultitech/minecraft-skins-editor/issues"
+  },
+  "keywords": ["minecraft", "skin", "editor", "webgl2", "pixel-art", "mcp"],
+  "files": [
+    "index.html",
+    "css/",
+    "js/",
+    "docs/",
+    "tests/",
+    ".nojekyll",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "start": "python3 -m http.server 8080"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}
