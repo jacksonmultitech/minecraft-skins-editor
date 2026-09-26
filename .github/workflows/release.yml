@@ -50,7 +50,7 @@ jobs:
         run: |
           mkdir -p dist
           npm pack --pack-destination dist
-          zip -r "dist/minecraft-skins-editor-v${VERSION}.zip" index.html css js docs tests .nojekyll README.md LICENSE CHANGELOG.md
+          zip -r "dist/minecraft-skins-editor-v${VERSION}.zip" index.html favicon.svg css js docs tests .nojekyll README.md LICENSE CHANGELOG.md
           awk -v v="$VERSION" '/^## \[/{p = index($0, "[" v "]") > 0; next} p' CHANGELOG.md > dist/notas.md
           ls -l dist
 

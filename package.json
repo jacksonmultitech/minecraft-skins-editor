@@ -13,9 +13,17 @@
   "bugs": {
     "url": "https://github.com/jacksonmultitech/minecraft-skins-editor/issues"
   },
-  "keywords": ["minecraft", "skin", "editor", "webgl2", "pixel-art", "mcp"],
+  "keywords": [
+    "minecraft",
+    "skin",
+    "editor",
+    "webgl2",
+    "pixel-art",
+    "mcp"
+  ],
   "files": [
     "index.html",
+    "favicon.svg",
     "css/",
     "js/",
     "docs/",
