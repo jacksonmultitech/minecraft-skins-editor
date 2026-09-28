@@ -36,7 +36,7 @@ python3 -m http.server 8080
 # o bien: npx serve .
 ```
 
-Abre `http://localhost:8080`. Las pruebas están en `http://localhost:8080/tests/` y la documentación completa en `http://localhost:8080/docs/`.
+Abre `http://localhost:8080`. Las pruebas están en `http://localhost:8080/tests/` y la documentación completa en `http://localhost:8080/docs/` (también publicada en la [Wiki](https://github.com/jacksonmultitech/minecraft-skins-editor/wiki)).
 
 ## Publicación (GitHub Pages)
 
@@ -78,7 +78,8 @@ js/ui/            Barra de herramientas, paneles, diálogos, notificaciones, tem
 js/remote/        Puente con el agente de IA (sesión, consulta de órdenes y comandos)
 js/i18n/          Textos (es-419)
 js/utils/         Utilidades (eventos, color, almacenamiento, teclado, gestos)
-docs/             Documentación en español
+docs/             Documentación en español (fuente de la Wiki)
+scripts/          docs_to_wiki.py: convierte docs/index.html en páginas de la Wiki
 tests/            Pruebas del núcleo (se ejecutan en el navegador)
 ```
 

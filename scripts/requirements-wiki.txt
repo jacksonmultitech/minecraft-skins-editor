@@ -1,0 +1,3 @@
+# Dependencias de scripts/docs_to_wiki.py (conversión de la documentación a la Wiki).
+beautifulsoup4==4.15.0
+markdownify==1.2.3

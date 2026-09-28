@@ -594,6 +594,9 @@ npx serve .
         </ol>
         <p>El selector se arma solo con esa lista, y las pruebas comprueban que cada fondo sea opaco y determinista.</p>
 
+        <h3>Documentación y Wiki</h3>
+        <p>Esta página (<code>docs/index.html</code>) es la fuente de la documentación. En cada cambio, el workflow <code>.github/workflows/wiki.yml</code> ejecuta <code>scripts/docs_to_wiki.py</code>, que la divide en una página por sección, y publica el resultado en la Wiki del repositorio. Para corregir la Wiki, edita este archivo; las imágenes de la Wiki están en <code>docs/img/</code>.</p>
+
         <h3>Convenciones</h3>
         <ul>
           <li>Módulos ES nativos, un archivo por responsabilidad y comentarios JSDoc en español.</li>

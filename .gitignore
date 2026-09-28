@@ -14,3 +14,7 @@ node_modules/
 
 # Variables de entorno
 .env*
+
+# Salida local de scripts/docs_to_wiki.py
+wiki-build/
+__pycache__/

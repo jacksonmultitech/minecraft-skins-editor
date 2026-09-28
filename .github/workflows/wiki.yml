@@ -1,0 +1,57 @@
+# Wiki: convierte docs/index.html en páginas de la Wiki del repositorio y las
+# publica. La documentación del sitio es la fuente: la Wiki es una copia.
+name: Wiki
+
+on:
+  push:
+    branches: [main]
+    paths: [docs/**, scripts/docs_to_wiki.py, scripts/requirements-wiki.txt, .github/workflows/wiki.yml]
+  # Se ejecuta también al crear o editar una página desde la pestaña Wiki
+  # (por ejemplo, la primera página, que es la que crea el repositorio de la Wiki).
+  gollum:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wiki
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Generar las páginas
+        run: |
+          pip install -r scripts/requirements-wiki.txt
+          python3 scripts/docs_to_wiki.py wiki-build
+
+      - name: Publicar en la Wiki
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          if ! git clone --depth 1 "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git" wiki-repo 2> /dev/null; then
+            echo "::warning title=La Wiki aún no existe::GitHub crea la Wiki al guardar su primera página. Abre la pestaña Wiki, pulsa 'Create the first page' y guárdala con cualquier texto: este workflow se ejecutará solo y publicará toda la documentación."
+            echo "**La Wiki aún no existe.** Abre la pestaña *Wiki*, pulsa *Create the first page* y guárdala con cualquier texto: este workflow se ejecutará solo y publicará la documentación." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          # Copia sin borrar: las páginas creadas a mano en la Wiki se conservan.
+          cp -R wiki-build/. wiki-repo/
+          cd wiki-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "La Wiki ya estaba al día." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git commit -m "Actualizar desde docs/index.html (${GITHUB_SHA::7})"
+          git push
+          echo "Wiki actualizada: $(git diff --stat HEAD~1 --shortstat)" | tee -a "$GITHUB_STEP_SUMMARY"
